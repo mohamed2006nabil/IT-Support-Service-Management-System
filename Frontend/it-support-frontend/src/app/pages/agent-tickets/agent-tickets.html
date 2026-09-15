@@ -1,0 +1,94 @@
+<div class="agent-tickets-page">
+
+  <div class="agent-tickets-header">
+
+    <button
+      type="button"
+      class="back-btn"
+      (click)="goBack()"
+    >
+      ← Back
+    </button>
+
+    <div>
+      <h1>Assigned Tickets</h1>
+
+      <p>
+        View and manage tickets assigned to you.
+      </p>
+    </div>
+
+  </div>
+
+
+  <div class="tickets-card">
+
+    <div class="card-header">
+      <h2>My Assigned Tickets</h2>
+    </div>
+
+
+    <div class="tickets-table">
+
+      <div class="table-row table-head">
+
+        <span>ID</span>
+        <span>Title</span>
+        <span>Priority</span>
+        <span>Status</span>
+        <span>Created</span>
+
+      </div>
+
+
+      <div
+        class="table-row"
+        *ngFor="let ticket of tickets()"
+        (click)="goToTicketDetails(ticket.id)"
+      >
+
+        <span>
+          #{{ ticket.id }}
+        </span>
+
+        <span>
+          {{ ticket.title }}
+        </span>
+
+        <span>
+          #{{ ticket.priorityId }}
+        </span>
+
+        <span>
+          #{{ ticket.statusId }}
+        </span>
+
+        <span>
+          {{ ticket.createdAt | date:'dd/MM/yyyy' }}
+        </span>
+
+      </div>
+
+
+      <div
+        class="empty-state"
+        *ngIf="tickets().length === 0"
+      >
+
+        <div class="empty-icon">
+          🎫
+        </div>
+
+        <h3>No Assigned Tickets</h3>
+
+        <p>
+          There are currently no tickets assigned to you.
+        </p>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

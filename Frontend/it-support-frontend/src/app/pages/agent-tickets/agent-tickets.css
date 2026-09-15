@@ -1,0 +1,249 @@
+/* =========================
+   Agent Tickets Page
+   ========================= */
+
+.agent-tickets-page {
+  min-height: 100vh;
+  background: #f4f6f9;
+  padding: 40px;
+  box-sizing: border-box;
+}
+
+
+/* =========================
+   Header
+   ========================= */
+
+.agent-tickets-header {
+  max-width: 1200px;
+  margin: 0 auto 30px;
+
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.agent-tickets-header h1 {
+  margin: 0 0 6px;
+
+  color: #1f2937;
+
+  font-size: 28px;
+}
+
+.agent-tickets-header p {
+  margin: 0;
+
+  color: #6b7280;
+
+  font-size: 15px;
+}
+
+
+/* =========================
+   Back Button
+   ========================= */
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  border: none;
+  background: transparent;
+
+  color: #6b7280;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  padding: 0;
+  margin-top: 5px;
+
+  cursor: pointer;
+
+  appearance: none;
+  -webkit-appearance: none;
+
+  transition: all 0.2s ease;
+}
+
+.back-btn:hover {
+  color: #2563eb;
+  transform: translateX(-3px);
+}
+
+
+/* =========================
+   Tickets Card
+   ========================= */
+
+.tickets-card {
+  max-width: 1200px;
+  margin: 0 auto;
+
+  background: white;
+
+  border-radius: 12px;
+
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.06);
+
+  overflow: hidden;
+}
+
+
+/* =========================
+   Card Header
+   ========================= */
+
+.card-header {
+  padding: 25px;
+
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.card-header h2 {
+  margin: 0;
+
+  color: #1f2937;
+
+  font-size: 20px;
+}
+
+
+/* =========================
+   Table
+   ========================= */
+
+.tickets-table {
+  width: 100%;
+}
+
+.table-row {
+  display: grid;
+
+  grid-template-columns:
+    80px
+    2fr
+    1fr
+    1fr
+    1.2fr;
+
+  align-items: center;
+
+  min-height: 60px;
+
+  padding: 0 25px;
+
+  border-bottom: 1px solid #e5e7eb;
+
+  box-sizing: border-box;
+}
+
+
+/* Clickable Rows */
+
+.table-row:not(.table-head) {
+  cursor: pointer;
+
+  transition: background 0.2s ease;
+}
+
+.table-row:not(.table-head):hover {
+  background: #f3f4f6;
+}
+
+.table-row:not(.table-head):active {
+  background: #e5e7eb;
+}
+
+.table-row:last-child {
+  border-bottom: none;
+}
+
+.table-row span {
+  color: #4b5563;
+
+  font-size: 14px;
+}
+
+
+/* =========================
+   Table Header
+   ========================= */
+
+.table-head {
+  background: #f9fafb;
+
+  min-height: 50px;
+
+  cursor: default;
+}
+
+.table-head span {
+  color: #374151;
+
+  font-size: 13px;
+
+  font-weight: 600;
+}
+
+
+/* =========================
+   Empty State
+   ========================= */
+
+.empty-state {
+  padding: 70px 25px;
+
+  text-align: center;
+}
+
+.empty-icon {
+  font-size: 42px;
+
+  margin-bottom: 15px;
+}
+
+.empty-state h3 {
+  margin: 0 0 6px;
+
+  color: #1f2937;
+
+  font-size: 18px;
+}
+
+.empty-state p {
+  margin: 0;
+
+  color: #6b7280;
+
+  font-size: 14px;
+}
+
+
+/* =========================
+   Responsive
+   ========================= */
+
+@media (max-width: 768px) {
+
+  .agent-tickets-page {
+    padding: 20px;
+  }
+
+  .agent-tickets-header {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .tickets-card {
+    overflow-x: auto;
+  }
+
+  .tickets-table {
+    min-width: 700px;
+  }
+
+}

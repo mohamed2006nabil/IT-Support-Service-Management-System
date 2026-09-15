@@ -1,0 +1,152 @@
+<div class="ticket-history-page">
+
+  <!-- Header -->
+
+  <div class="history-header">
+
+    <div>
+
+      <button
+        type="button"
+        class="back-btn"
+        (click)="goBack()"
+      >
+        ← Back
+      </button>
+
+      <h1>
+        Ticket History
+      </h1>
+
+      <p>
+        Review the activity and history of support tickets.
+      </p>
+
+    </div>
+
+  </div>
+
+
+  <!-- History Card -->
+
+  <div class="history-card">
+
+    <div class="card-header">
+
+      <h2>
+        Ticket Activity
+      </h2>
+
+    </div>
+
+
+    <div class="history-list">
+
+
+      <!-- History Item -->
+
+      <div
+        class="history-item"
+        *ngFor="let item of history()"
+      >
+
+        <div class="history-icon">
+          📋
+        </div>
+
+
+        <div class="history-content">
+
+          <div class="history-top">
+
+            <h3>
+              Ticket #{{ item.ticketId }}
+            </h3>
+
+            <span class="history-date">
+              {{ item.createdAt | date:'dd/MM/yyyy HH:mm' }}
+            </span>
+
+          </div>
+
+
+          <p class="history-action">
+            {{ item.action }}
+          </p>
+
+
+          <div
+            class="status-change"
+            *ngIf="item.oldStatusName || item.newStatusName"
+          >
+
+            <span
+              *ngIf="item.oldStatusName"
+              class="old-status"
+            >
+              {{ item.oldStatusName }}
+            </span>
+
+
+            <span
+              *ngIf="item.oldStatusName && item.newStatusName"
+              class="status-arrow"
+            >
+              →
+            </span>
+
+
+            <span
+              *ngIf="item.newStatusName"
+              class="new-status"
+            >
+              {{ item.newStatusName }}
+            </span>
+
+          </div>
+
+
+          <p
+            class="history-notes"
+            *ngIf="item.notes"
+          >
+            {{ item.notes }}
+          </p>
+
+
+          <span class="history-user">
+            By {{ item.userName }}
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <!-- Empty State -->
+
+      <div
+        class="empty-history"
+        *ngIf="history().length === 0"
+      >
+
+        <div class="empty-history-icon">
+          📋
+        </div>
+
+        <h3>
+          No Ticket History
+        </h3>
+
+        <p>
+          There is no ticket activity to display yet.
+        </p>
+
+      </div>
+
+
+    </div>
+
+  </div>
+
+</div>

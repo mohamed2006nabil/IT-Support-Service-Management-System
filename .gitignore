@@ -1,0 +1,111 @@
+# ================================
+# .NET / ASP.NET Core
+# ================================
+
+**/bin/
+**/obj/
+
+*.user
+*.suo
+
+# Visual Studio
+.vs/
+
+# Build / publish output
+**/publish/
+**/artifacts/
+
+# ================================
+# Angular / Node.js
+# ================================
+
+**/node_modules/
+**/.angular/
+**/dist/
+**/coverage/
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Angular temporary files
+/tmp
+/out-tsc
+/bazel-out
+/libpeerconnection.log
+/testem.log
+/typings
+__screenshots__/
+
+# ================================
+# IDEs / Editors
+# ================================
+
+.idea/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/mcp.json
+
+.history/
+
+# ================================
+# Environment / Secrets
+# ================================
+
+.env
+.env.*
+!.env.example
+
+# ASP.NET local/development config
+appsettings.Local.json
+
+# User Secrets are stored outside the project,
+# so no secrets should be committed here.
+
+# Certificates / private keys
+*.pfx
+*.p12
+*.pem
+*.key
+
+# ================================
+# Logs
+# ================================
+
+*.log
+logs/
+
+# ================================
+# Archives / Temporary files
+# ================================
+
+*.zip
+*.rar
+*.7z
+*.tmp
+*.temp
+
+# ================================
+# OS files
+# ================================
+
+.DS_Store
+Thumbs.db
+
+# ================================
+# Miscellaneous
+# ================================
+
+/.sass-cache/
+/connect.lock

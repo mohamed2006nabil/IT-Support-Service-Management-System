@@ -1,0 +1,92 @@
+<div class="dashboard">
+
+  <header class="dashboard-header">
+
+    <div class="header-info">
+      <h1>IT Support Dashboard</h1>
+      <p>Service Management System</p>
+    </div>
+
+    <div class="user-info">
+      <div class="user-details">
+        <span class="user-name">{{ user?.fullName }}</span>
+        <span class="user-role">{{ user?.role }}</span>
+      </div>
+
+      <button
+      class="logout-btn"
+      (click)="logout()"
+      >
+      Logout
+      </button>
+    </div>
+
+  </header>
+
+  <main class="dashboard-content">
+
+    <div class="welcome-card">
+      <h2>Welcome, {{ user?.fullName }} 👋</h2>
+      <p>
+        Manage your IT support requests and tickets from your dashboard.
+      </p>
+    </div>
+
+    <div class="dashboard-cards">
+
+      <div class="dashboard-card">
+        <div class="card-icon">🎫</div>
+
+        <h3>My Tickets</h3>
+
+        <p>
+          View and manage your support tickets.
+        </p>
+
+        <button
+        class="card-btn"
+        (click)="goToTickets()"
+        >
+        View Tickets
+        </button>
+      </div>
+
+      <div class="dashboard-card">
+        <div class="card-icon">➕</div>
+
+        <h3>Create Ticket</h3>
+
+        <p>
+          Submit a new IT support request.
+        </p>
+
+        <button
+        class="card-btn"
+        (click)="goToCreateTicket()"
+        >
+        Create Ticket
+        </button>
+      </div>
+
+      <div class="dashboard-card">
+        <div class="card-icon">🔔</div>
+
+        <h3>Notifications</h3>
+
+        <p>
+          Check your latest notifications.
+        </p>
+
+        <button
+         class="card-btn"
+         (click)="goToNotifications()"
+        >
+        View Notifications
+        </button>
+      </div>
+
+    </div>
+
+  </main>
+
+</div>

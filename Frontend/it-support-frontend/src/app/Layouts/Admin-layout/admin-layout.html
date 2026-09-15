@@ -1,0 +1,306 @@
+<div class="admin-layout">
+
+  <aside class="sidebar">
+
+    <!-- Brand -->
+    <div class="brand">
+
+      <div class="brand-mark">
+        IT
+      </div>
+
+      <div>
+        <strong>
+          IT Support
+        </strong>
+
+        <span>
+          Service Management
+        </span>
+      </div>
+
+    </div>
+
+
+    <!-- Navigation -->
+    <nav
+      class="sidebar-nav"
+      aria-label="Admin navigation"
+    >
+
+      <!-- Dashboard -->
+      <a
+        routerLink="/admin/dashboard"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
+
+        <svg
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <rect x="3" y="3" width="7" height="7" />
+          <rect x="14" y="3" width="7" height="7" />
+          <rect x="3" y="14" width="7" height="7" />
+          <rect x="14" y="14" width="7" height="7" />
+        </svg>
+
+        <span>
+          Dashboard
+        </span>
+
+      </a>
+
+
+      <!-- Users -->
+      <a
+        routerLink="/admin/users"
+        routerLinkActive="active"
+      >
+
+        <svg
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <circle
+            cx="9"
+            cy="7"
+            r="4"
+          />
+
+          <path
+            d="M3 21v-2a6 6 0 0 1 12 0v2"
+          />
+
+          <path
+            d="M16 4.5a4 4 0 0 1 0 7.5"
+          />
+
+          <path
+            d="M21 21v-2a6 6 0 0 0-3-5.2"
+          />
+        </svg>
+
+        <span>
+          Users
+        </span>
+
+      </a>
+
+
+      <!-- Tickets -->
+      <a
+        routerLink="/admin/tickets"
+        routerLinkActive="active"
+      >
+
+        <svg
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path d="M4 5h16v14H4z" />
+          <path d="M8 9h8" />
+          <path d="M8 13h5" />
+        </svg>
+
+        <span>
+          Tickets
+        </span>
+
+      </a>
+
+
+      <!-- Categories -->
+      <a
+        routerLink="/admin/categories"
+        routerLinkActive="active"
+      >
+
+        <svg
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path d="M4 5h16v14H4z" />
+          <path d="M8 9h8" />
+          <path d="M8 13h5" />
+        </svg>
+
+        <span>
+          Categories
+        </span>
+
+      </a>
+
+
+      <!-- Priorities -->
+      <a
+        routerLink="/admin/priorities"
+        routerLinkActive="active"
+      >
+
+        <svg
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path
+            d="M13 2 4 14h6l-1 8 9-12h-6z"
+          />
+        </svg>
+
+        <span>
+          Priorities
+        </span>
+
+      </a>
+
+
+      <!-- Departments -->
+      <a
+        routerLink="/admin/departments"
+        routerLinkActive="active"
+      >
+
+        <svg
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path d="M4 4h16v16H4z" />
+          <path d="M8 8h8" />
+          <path d="M8 12h8" />
+          <path d="M8 16h5" />
+        </svg>
+
+        <span>
+          Departments
+        </span>
+
+      </a>
+
+
+      <!-- Ticket History -->
+      <a
+        routerLink="/admin/ticket-history"
+        routerLinkActive="active"
+      >
+
+        <svg
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path d="M6 3h12v18H6z" />
+          <path d="M9 7h6" />
+          <path d="M9 11h6" />
+          <path d="M9 15h4" />
+        </svg>
+
+        <span>
+          Ticket History
+        </span>
+
+      </a>
+
+    </nav>
+
+
+    <!-- Sidebar Bottom -->
+    <div class="sidebar-bottom">
+
+      <!-- Current Admin -->
+      <a
+        routerLink="/admin/profile"
+        routerLinkActive="profile-active"
+        class="admin-user"
+        aria-label="Open profile"
+      >
+
+        @if (user()?.profileImagePath) {
+
+          <img
+            class="user-avatar user-avatar-image"
+            [src]="'http://localhost:5058' + user()!.profileImagePath"
+            [alt]="(user()?.fullName || 'Administrator') + ' profile photo'"
+          />
+
+        } @else {
+
+          <span
+            class="user-avatar"
+            aria-hidden="true"
+          >
+            {{
+              user()?.fullName?.charAt(0)?.toUpperCase()
+              || 'A'
+            }}
+          </span>
+
+        }
+
+
+        <div class="admin-user-info">
+
+          <strong>
+            {{ user()?.fullName || 'Administrator' }}
+          </strong>
+
+          <span>
+            {{ user()?.role || 'Admin' }}
+          </span>
+
+        </div>
+
+      </a>
+
+
+      <!-- Logout -->
+      <button
+        type="button"
+        class="logout-btn"
+        (click)="logout()"
+      >
+
+        <svg
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path d="M10 17l5-5-5-5" />
+          <path d="M15 12H3" />
+          <path
+            d="M21 19V5a2 2 0 0 0-2-2h-6"
+          />
+        </svg>
+
+        <span>
+          Logout
+        </span>
+
+      </button>
+
+    </div>
+
+  </aside>
+
+
+  <!-- Main Content -->
+  <div class="admin-main">
+
+    <main class="page-content">
+      <router-outlet></router-outlet>
+    </main>
+
+
+    <!-- Footer -->
+    <footer class="admin-footer">
+
+      <span>
+        IT Support &amp; Service Management System
+      </span>
+
+      <span>
+        © 2026
+      </span>
+
+    </footer>
+
+  </div>
+
+</div>

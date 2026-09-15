@@ -1,0 +1,615 @@
+<section class="profile-page">
+
+  <header class="page-header">
+
+    <div>
+      <span class="page-label">
+        Account
+      </span>
+
+      <h1>
+        Profile
+      </h1>
+
+      <p>
+        Manage your personal information and account details.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="back-btn"
+      (click)="goBack()"
+    >
+      Back to dashboard
+    </button>
+
+  </header>
+
+
+  @if (saveSuccess()) {
+
+    <div
+      class="success-message"
+      role="status"
+      aria-live="polite"
+    >
+      Profile updated successfully.
+    </div>
+
+  }
+
+
+  @if (saveError()) {
+
+    <div
+      class="error-message page-error"
+      role="alert"
+    >
+      {{ saveError() }}
+    </div>
+
+  }
+
+
+  @if (user(); as currentUser) {
+
+    <!-- Hidden file input -->
+
+    <input
+      #photoInput
+      type="file"
+      accept="image/png,image/jpeg"
+      hidden
+      (change)="onPhotoSelected($event)"
+    />
+
+
+    <section
+      class="profile-section"
+      aria-labelledby="personal-information-title"
+    >
+
+      <header class="section-header">
+
+        <div>
+          <h2 id="personal-information-title">
+            Personal Information
+          </h2>
+
+          <p>
+            Update the information associated with your account.
+          </p>
+        </div>
+
+
+        @if (!isEditing()) {
+
+          <button
+            type="button"
+            class="edit-btn"
+            (click)="startEditing()"
+          >
+            Edit Profile
+          </button>
+
+        }
+
+      </header>
+
+
+      @if (isEditing()) {
+
+        <form
+          class="profile-form"
+          (ngSubmit)="saveProfile()"
+        >
+
+          <div class="profile-identity">
+
+            <!-- Preview / saved image -->
+
+            @if (photoPreview(); as preview) {
+
+              <img
+                class="profile-avatar profile-image"
+                [src]="preview"
+                alt="Selected profile photo"
+              />
+
+            } @else if (currentUser.profileImagePath) {
+
+              <img
+                class="profile-avatar profile-image"
+                [src]="getPhotoUrl(currentUser.profileImagePath)"
+                alt="Profile photo"
+              />
+
+            } @else {
+
+              <div
+                class="profile-avatar"
+                aria-hidden="true"
+              >
+                {{ currentUser.fullName.charAt(0).toUpperCase() }}
+              </div>
+
+            }
+
+
+            <div class="profile-photo-actions">
+
+              <strong>
+                {{ currentUser.fullName }}
+              </strong>
+
+              <span>
+                {{ currentUser.role }}
+              </span>
+
+
+              @if (!selectedPhoto()) {
+
+                <button
+                  type="button"
+                  class="photo-btn"
+                  (click)="photoInput.click()"
+                >
+                  Change photo
+                </button>
+
+              } @else {
+
+                <span class="photo-status">
+                  New photo selected
+                </span>
+
+                <div class="photo-action-group">
+
+                  <button
+                    type="button"
+                    class="save-photo-btn"
+                    [disabled]="isUploadingPhoto()"
+                    (click)="savePhoto()"
+                  >
+                    @if (isUploadingPhoto()) {
+                      Saving...
+                    } @else {
+                      Save photo
+                    }
+                  </button>
+
+
+                  <button
+                    type="button"
+                    class="cancel-photo-btn"
+                    [disabled]="isUploadingPhoto()"
+                    (click)="cancelPhoto()"
+                  >
+                    Cancel
+                  </button>
+
+                </div>
+
+              }
+
+
+              @if (
+                currentUser.profileImagePath &&
+                !selectedPhoto()
+              ) {
+
+                <button
+                  type="button"
+                  class="clear-photo-btn"
+                  [disabled]="isUploadingPhoto()"
+                  (click)="clearPhoto()"
+                >
+                  @if (isUploadingPhoto()) {
+                    Removing...
+                  } @else {
+                    Clear photo
+                  }
+                </button>
+
+              }
+
+            </div>
+
+          </div>
+
+
+          <div class="form-fields">
+
+            <div class="form-field">
+
+              <label for="fullName">
+                Full name
+              </label>
+
+              <input
+                id="fullName"
+                type="text"
+                name="fullName"
+                [(ngModel)]="editProfile.fullName"
+                autocomplete="name"
+                required
+                [disabled]="isSaving()"
+              />
+
+            </div>
+
+
+            <div class="form-field">
+
+              <label for="email">
+                Email address
+              </label>
+
+              <input
+                id="email"
+                type="email"
+                name="email"
+                [(ngModel)]="editProfile.email"
+                autocomplete="email"
+                required
+                [disabled]="isSaving()"
+              />
+
+            </div>
+
+
+            <div class="form-field">
+
+              <label for="phone">
+                Phone number
+              </label>
+
+              <input
+                id="phone"
+                type="tel"
+                name="phone"
+                [(ngModel)]="editProfile.phone"
+                autocomplete="tel"
+                required
+                [disabled]="isSaving()"
+              />
+
+            </div>
+
+
+            <div class="form-field">
+
+              <label for="role">
+                Role
+              </label>
+
+              <input
+                id="role"
+                type="text"
+                [value]="currentUser.role"
+                disabled
+              />
+
+            </div>
+
+
+            <div class="form-field">
+
+              <label for="userId">
+                User ID
+              </label>
+
+              <input
+                id="userId"
+                type="text"
+                [value]="'#' + currentUser.userId"
+                disabled
+              />
+
+            </div>
+
+          </div>
+
+
+          <div class="form-actions">
+
+            <button
+              type="button"
+              class="cancel-btn"
+              (click)="cancelEditing()"
+              [disabled]="isSaving()"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="submit"
+              class="save-btn"
+              [disabled]="isSaving()"
+            >
+
+              @if (isSaving()) {
+                Saving...
+              } @else {
+                Save changes
+              }
+
+            </button>
+
+          </div>
+
+        </form>
+
+
+      } @else {
+
+        <div class="profile-content">
+
+          <div class="profile-identity">
+
+            @if (photoPreview(); as preview) {
+
+              <img
+                class="profile-avatar profile-image"
+                [src]="preview"
+                alt="Selected profile photo"
+              />
+
+            } @else if (currentUser.profileImagePath) {
+
+              <img
+                class="profile-avatar profile-image"
+                [src]="getPhotoUrl(currentUser.profileImagePath)"
+                alt="Profile photo"
+              />
+
+            } @else {
+
+              <div
+                class="profile-avatar"
+                aria-hidden="true"
+              >
+                {{ currentUser.fullName.charAt(0).toUpperCase() }}
+              </div>
+
+            }
+
+
+            <div class="profile-photo-actions">
+
+              <strong>
+                {{ currentUser.fullName }}
+              </strong>
+
+              <span>
+                {{ currentUser.role }}
+              </span>
+
+
+              @if (!selectedPhoto()) {
+
+                <button
+                  type="button"
+                  class="photo-btn"
+                  (click)="photoInput.click()"
+                >
+                  Change photo
+                </button>
+
+              } @else {
+
+                <span class="photo-status">
+                  New photo selected
+                </span>
+
+                <div class="photo-action-group">
+
+                  <button
+                    type="button"
+                    class="save-photo-btn"
+                    [disabled]="isUploadingPhoto()"
+                    (click)="savePhoto()"
+                  >
+                    @if (isUploadingPhoto()) {
+                      Saving...
+                    } @else {
+                      Save photo
+                    }
+                  </button>
+
+
+                  <button
+                    type="button"
+                    class="cancel-photo-btn"
+                    [disabled]="isUploadingPhoto()"
+                    (click)="cancelPhoto()"
+                  >
+                    Cancel
+                  </button>
+
+                </div>
+
+              }
+
+
+              @if (
+                currentUser.profileImagePath &&
+                !selectedPhoto()
+              ) {
+
+                <button
+                  type="button"
+                  class="clear-photo-btn"
+                  [disabled]="isUploadingPhoto()"
+                  (click)="clearPhoto()"
+                >
+                  @if (isUploadingPhoto()) {
+                    Removing...
+                  } @else {
+                    Clear photo
+                  }
+                </button>
+
+              }
+
+            </div>
+
+          </div>
+
+
+          <div class="profile-details">
+
+            <div class="detail">
+
+              <span class="detail-label">
+                Full name
+              </span>
+
+              <span class="detail-value">
+                {{ currentUser.fullName }}
+              </span>
+
+            </div>
+
+
+            <div class="detail">
+
+              <span class="detail-label">
+                Email address
+              </span>
+
+              <span class="detail-value">
+                {{ currentUser.email }}
+              </span>
+
+            </div>
+
+
+            <div class="detail">
+
+              <span class="detail-label">
+                Phone number
+              </span>
+
+              <span class="detail-value">
+                {{ currentUser.phone || 'Not provided' }}
+              </span>
+
+            </div>
+
+
+            <div class="detail">
+
+              <span class="detail-label">
+                Role
+              </span>
+
+              <span class="detail-value">
+                {{ currentUser.role }}
+              </span>
+
+            </div>
+
+
+            <div class="detail">
+
+              <span class="detail-label">
+                User ID
+              </span>
+
+              <span class="detail-value">
+                #{{ currentUser.userId }}
+              </span>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      }
+
+    </section>
+
+
+    <section
+      class="account-section"
+      aria-labelledby="account-information-title"
+    >
+
+      <header class="section-header">
+
+        <div>
+          <h2 id="account-information-title">
+            Account Information
+          </h2>
+
+          <p>
+            Additional information about your account.
+          </p>
+        </div>
+
+      </header>
+
+
+      <div class="account-details">
+
+        <div class="detail">
+
+          <span class="detail-label">
+            Account created
+          </span>
+
+          <span class="detail-value">
+            {{ currentUser.createdAt | date:'MMM d, y' }}
+          </span>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <section
+      class="help-section"
+      aria-label="Account help"
+    >
+
+      <div>
+
+        <h2>
+          Need help?
+        </h2>
+
+        <p>
+          If you have any issues with your account,
+          please contact the system administrator.
+        </p>
+
+      </div>
+
+    </section>
+
+
+  } @else {
+
+    <section
+      class="profile-state"
+      aria-live="polite"
+    >
+
+      <h2>
+        Profile unavailable
+      </h2>
+
+      <p>
+        We could not load your account information.
+      </p>
+
+    </section>
+
+  }
+
+</section>

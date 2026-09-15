@@ -1,0 +1,187 @@
+:root {
+  /* Colors */
+  --color-primary: #2563eb;
+  --color-primary-hover: #1d4ed8;
+
+  --color-text: #172033;
+  --color-text-secondary: #64748b;
+  --color-text-muted: #94a3b8;
+
+  --color-background: #f8fafc;
+  --color-surface: #ffffff;
+  --color-surface-hover: #f8fafc;
+
+  --color-border: #e2e8f0;
+  --color-border-hover: #cbd5e1;
+  --color-border-focus: #2563eb;
+
+  --color-success: #15803d;
+  --color-warning: #b45309;
+  --color-danger: #dc2626;
+
+  /* Soft feature colors */
+  --color-blue-soft: #eff6ff;
+  --color-blue-border: #bfdbfe;
+  --color-blue-accent: #2563eb;
+
+  --color-green-soft: #f0fdf4;
+  --color-green-border: #bbf7d0;
+  --color-green-accent: #16a34a;
+
+  --color-orange-soft: #fff7ed;
+  --color-orange-border: #fed7aa;
+  --color-orange-accent: #ea580c;
+
+  --color-red-soft: #fef2f2;
+  --color-red-border: #fecaca;
+  --color-red-accent: #dc2626;
+
+  --color-purple-soft: #faf5ff;
+  --color-purple-border: #e9d5ff;
+  --color-purple-accent: #7c3aed;
+
+  --color-teal-soft: #f0fdfa;
+  --color-teal-border: #99f6e4;
+  --color-teal-accent: #0f766e;
+
+  /* Typography */
+  --font-family: Inter, Arial, Helvetica, sans-serif;
+
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-md: 16px;
+  --font-size-lg: 20px;
+  --font-size-xl: 24px;
+  --font-size-2xl: 32px;
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* Borders */
+  --border-width: 1px;
+  --border-color: var(--color-border);
+  --border-radius: 8px;
+
+  /* Layout */
+  --content-max-width: 1280px;
+
+  /* Form controls */
+  --control-height: 40px;
+
+  /* Motion */
+  --transition-fast: 140ms ease-out;
+  --transition-normal: 180ms ease-out;
+}
+
+
+/* Base */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: var(--font-family);
+  font-size: var(--font-size-md);
+  line-height: 1.5;
+  color: var(--color-text);
+  background: var(--color-background);
+}
+
+
+/* Typography */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+  color: var(--color-text);
+  font-weight: var(--font-weight-semibold);
+}
+
+p {
+  margin: 0;
+}
+
+
+/* Buttons */
+
+button {
+  font: inherit;
+}
+
+
+/* Keyboard focus */
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+
+/* Form controls */
+
+input,
+select,
+textarea {
+  font: inherit;
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--border-radius);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--color-border-focus);
+  outline: none;
+}
+
+
+/* Links */
+
+a {
+  color: inherit;
+}
+
+
+/* Reduced motion */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

@@ -1,0 +1,345 @@
+<div class="admin-history-page">
+
+  <header class="history-header">
+    <div class="header-main">
+      <div class="header-copy">
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+          <button type="button" class="breadcrumb-link" (click)="goHome()">Home</button>
+          <span class="breadcrumb-separator" aria-hidden="true">/</span>
+          <span class="breadcrumb-current">Ticket History</span>
+        </nav>
+
+        <span class="eyebrow">Administration</span>
+        <h1>Ticket History</h1>
+        <p>Review the complete activity and audit history of all support tickets.</p>
+      </div>
+
+      <div class="header-actions">
+        <div class="system-status">
+          <span class="system-status-dot" aria-hidden="true"></span>
+          <div>
+            <strong>System operational</strong>
+            <span>All services running</span>
+          </div>
+        </div>
+
+        <div class="header-updated">
+          <span class="updated-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="8.5"></circle>
+              <path d="M12 7v5l3 2"></path>
+            </svg>
+          </span>
+          <div>
+            <span>Last updated</span>
+            <strong>{{ lastUpdated() ? formatDate(lastUpdated()) : 'Not yet' }}</strong>
+          </div>
+        </div>
+
+        <div class="profile-menu">
+          <button
+            type="button"
+            class="profile-trigger"
+            aria-haspopup="menu"
+            [attr.aria-expanded]="isProfileMenuOpen"
+            [attr.aria-label]="'Open profile menu for ' + adminUser().fullName"
+            (click)="toggleProfileMenu()"
+          >
+            <span class="profile-avatar">
+              <img
+                *ngIf="getProfileImageUrl()"
+                [src]="getProfileImageUrl()!"
+                [alt]="adminUser().fullName"
+                (error)="handleProfileImageError()"
+              />
+              <span *ngIf="!getProfileImageUrl()" aria-hidden="true">
+                {{ adminUser().fullName.charAt(0).toUpperCase() }}
+              </span>
+            </span>
+            <span class="profile-trigger-copy">
+              <strong>{{ adminUser().fullName }}</strong>
+              <small>{{ adminUser().role }}</small>
+            </span>
+            <svg class="profile-chevron" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="m7 10 5 5 5-5"></path>
+            </svg>
+          </button>
+
+          <div *ngIf="isProfileMenuOpen" class="profile-dropdown" role="menu">
+            <div class="profile-dropdown-header">
+              <strong>{{ adminUser().fullName }}</strong>
+              <span>{{ adminUser().role }}</span>
+            </div>
+            <div class="profile-dropdown-divider"></div>
+
+            <button type="button" class="profile-menu-item" role="menuitem" (click)="goToAdminProfile()">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="8" r="4"></circle>
+                <path d="M4 21a8 8 0 0 1 16 0"></path>
+              </svg>
+              <span>View profile</span>
+            </button>
+
+            <button type="button" class="profile-menu-item profile-menu-item-danger" role="menuitem" (click)="logout()">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M10 17l5-5-5-5"></path>
+                <path d="M15 12H3"></path>
+                <path d="M21 4v16"></path>
+              </svg>
+              <span>Logout</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="history-content">
+    <div class="page-toolbar">
+      <div>
+        <span class="section-label">Audit &amp; Activity</span>
+        <h2>Ticket History</h2>
+      </div>
+      <button type="button" class="refresh-btn" (click)="refreshHistory()" [disabled]="loading()">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M20 11a8 8 0 0 0-14.9-3.9L3 10"></path>
+          <path d="M3 5v5h5"></path>
+          <path d="M4 13a8 8 0 0 0 14.9 3.9L21 14"></path>
+          <path d="M21 19v-5h-5"></path>
+        </svg>
+        Refresh
+      </button>
+    </div>
+
+    <section class="metrics-grid" aria-label="Ticket history summary">
+      <article class="metric-card">
+        <div>
+          <span class="metric-label">Total Activities</span>
+          <strong>{{ totalActivities() }}</strong>
+          <span class="metric-note">All recorded history</span>
+        </div>
+        <span class="metric-accent" aria-hidden="true"></span>
+      </article>
+
+      <article class="metric-card">
+        <div>
+          <span class="metric-label">Created</span>
+          <strong>{{ createdActivities() }}</strong>
+          <span class="metric-note">Ticket creation events</span>
+        </div>
+        <span class="metric-accent" aria-hidden="true"></span>
+      </article>
+
+      <article class="metric-card">
+        <div>
+          <span class="metric-label">Status Changes</span>
+          <strong>{{ statusChanges() }}</strong>
+          <span class="metric-note">Status activity recorded</span>
+        </div>
+        <span class="metric-accent" aria-hidden="true"></span>
+      </article>
+
+      <article class="metric-card">
+        <div>
+          <span class="metric-label">Other Activity</span>
+          <strong>{{ otherActivities() }}</strong>
+          <span class="metric-note">Other recorded actions</span>
+        </div>
+        <span class="metric-accent" aria-hidden="true"></span>
+      </article>
+    </section>
+
+    <section class="directory-card">
+      <div class="directory-header">
+        <div>
+          <span class="section-label">Directory</span>
+          <h2>Complete Ticket Activity</h2>
+          <p>Showing {{ pageStart() }}–{{ pageEnd() }} of {{ filteredHistory().length }} matching activities</p>
+        </div>
+        <span class="read-only-badge">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="5" y="10" width="14" height="10" rx="2"></rect>
+            <path d="M8 10V7a4 4 0 0 1 8 0v3"></path>
+          </svg>
+          Read only
+        </span>
+      </div>
+
+      <div class="filters-section">
+        <div class="search-box">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="11" cy="11" r="6.5"></circle>
+            <path d="m16 16 4.5 4.5"></path>
+          </svg>
+          <input
+            type="text"
+            placeholder="Search ticket, action, user or notes..."
+            [ngModel]="searchTerm()"
+            (ngModelChange)="searchTerm.set($event); onFilterChange()"
+          />
+          <button *ngIf="searchTerm()" type="button" class="clear-search" (click)="searchTerm.set(''); onFilterChange()" aria-label="Clear search">
+            ×
+          </button>
+        </div>
+
+        <div class="ticket-filter">
+          <input
+            type="number"
+            min="1"
+            placeholder="Ticket ID"
+            [ngModel]="ticketFilter()"
+            (ngModelChange)="ticketFilter.set($event); onFilterChange()"
+          />
+        </div>
+
+        <div class="action-filter">
+          <select [ngModel]="actionFilter()" (ngModelChange)="actionFilter.set($event); onFilterChange()">
+            <option value="">All Actions</option>
+            <option *ngFor="let action of availableActions()" [value]="action">{{ action }}</option>
+          </select>
+        </div>
+
+        <button *ngIf="hasActiveFilters()" type="button" class="clear-filters-btn" (click)="clearFilters()">
+          Reset
+        </button>
+      </div>
+
+      <div *ngIf="loading()" class="loading-state" aria-live="polite">
+        <div class="spinner"></div>
+        <p>Loading ticket history...</p>
+      </div>
+
+      <div *ngIf="!loading()" class="history-list">
+        <article class="history-item" *ngFor="let item of pagedHistory()">
+          <div class="timeline" aria-hidden="true">
+            <div class="timeline-dot">
+              <svg viewBox="0 0 24 24">
+                <rect x="6" y="4" width="12" height="16" rx="2"></rect>
+                <path d="M9 8h6M9 12h6M9 16h4"></path>
+              </svg>
+            </div>
+            <div class="timeline-line"></div>
+          </div>
+
+          <div class="history-content-row">
+            <div class="history-top">
+              <div class="ticket-info">
+                <span class="ticket-label">TICKET</span>
+                <h3>#{{ item.ticketId }}</h3>
+              </div>
+              <span class="history-date">{{ item.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+
+            <div class="action-row">
+              <span class="action-badge" [ngClass]="getActionClass(item.action)">{{ item.action }}</span>
+              <span class="history-user">By {{ item.userName }}</span>
+            </div>
+
+            <div class="status-change" *ngIf="item.oldStatusName || item.newStatusName">
+              <span *ngIf="item.oldStatusName" class="old-status">{{ item.oldStatusName }}</span>
+              <span *ngIf="item.oldStatusName && item.newStatusName" class="status-arrow" aria-hidden="true">→</span>
+              <span *ngIf="item.newStatusName" class="new-status">{{ item.newStatusName }}</span>
+            </div>
+
+            <p class="history-notes" *ngIf="item.notes">{{ item.notes }}</p>
+
+            <button type="button" class="view-history-btn" (click)="viewHistory(item)">
+              View details
+            </button>
+          </div>
+        </article>
+
+        <div class="empty-history" *ngIf="filteredHistory().length === 0 && history().length > 0">
+          <div class="empty-history-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4.5 4.5"></path></svg>
+          </div>
+          <h3>No Matching Activities</h3>
+          <p>Try changing your search or filter criteria.</p>
+          <button type="button" class="empty-clear-btn" (click)="clearFilters()">Reset Filters</button>
+        </div>
+
+        <div class="empty-history" *ngIf="filteredHistory().length === 0 && history().length === 0">
+          <div class="empty-history-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><rect x="6" y="4" width="12" height="16" rx="2"></rect><path d="M9 8h6M9 12h6M9 16h4"></path></svg>
+          </div>
+          <h3>No Ticket History</h3>
+          <p>There is no ticket activity to display yet.</p>
+        </div>
+
+        <nav *ngIf="filteredHistory().length > 0" class="pagination" aria-label="Ticket history pagination">
+          <span class="pagination-summary">{{ pageStart() }}–{{ pageEnd() }} of {{ filteredHistory().length }}</span>
+          <div class="pagination-controls">
+            <button type="button" class="page-btn" (click)="previousPage()" [disabled]="currentPage() === 1" aria-label="Previous page">‹</button>
+            <button
+              *ngFor="let page of pageNumbers()"
+              type="button"
+              class="page-btn"
+              [class.active]="page === currentPage()"
+              (click)="goToPage(page)"
+              [attr.aria-current]="page === currentPage() ? 'page' : null"
+            >{{ page }}</button>
+            <button type="button" class="page-btn" (click)="nextPage()" [disabled]="currentPage() === totalPages()" aria-label="Next page">›</button>
+          </div>
+        </nav>
+      </div>
+    </section>
+  </main>
+
+  <div *ngIf="message()" class="toast" [class.toast-success]="messageType() === 'success'" [class.toast-error]="messageType() === 'error'" role="status">
+    <span class="toast-icon" aria-hidden="true">{{ messageType() === 'success' ? '✓' : '!' }}</span>
+    <span>{{ message() }}</span>
+  </div>
+
+  <div *ngIf="showDetailsModal()" class="modal-overlay" (click)="closeDetails()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <span class="modal-label">HISTORY DETAILS</span>
+          <h2>Ticket #{{ selectedHistory()?.ticketId }}</h2>
+        </div>
+        <button type="button" class="modal-close" (click)="closeDetails()" aria-label="Close details">×</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="details-grid">
+          <div class="detail-item">
+            <span class="detail-label">History ID</span>
+            <strong>#{{ selectedHistory()?.id }}</strong>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Ticket ID</span>
+            <strong>#{{ selectedHistory()?.ticketId }}</strong>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Action</span>
+            <span class="action-badge" [ngClass]="getActionClass(selectedHistory()?.action || '')">{{ selectedHistory()?.action }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Performed By</span>
+            <strong>{{ selectedHistory()?.userName }}</strong>
+          </div>
+          <div class="detail-item" *ngIf="selectedHistory()?.oldStatusName">
+            <span class="detail-label">Previous Status</span>
+            <span class="old-status">{{ selectedHistory()?.oldStatusName }}</span>
+          </div>
+          <div class="detail-item" *ngIf="selectedHistory()?.newStatusName">
+            <span class="detail-label">New Status</span>
+            <span class="new-status">{{ selectedHistory()?.newStatusName }}</span>
+          </div>
+          <div class="detail-item full-width">
+            <span class="detail-label">Created At</span>
+            <strong>{{ selectedHistory()?.createdAt | date:'dd/MM/yyyy HH:mm:ss' }}</strong>
+          </div>
+          <div class="detail-item full-width" *ngIf="selectedHistory()?.notes">
+            <span class="detail-label">Notes</span>
+            <p class="modal-notes">{{ selectedHistory()?.notes }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="secondary-btn" (click)="closeDetails()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>

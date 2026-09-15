@@ -1,0 +1,251 @@
+/* =========================
+   Tickets Page
+   ========================= */
+
+.tickets-page {
+  min-height: 100vh;
+  background: #f4f6f9;
+  padding: 40px;
+  box-sizing: border-box;
+}
+
+
+/* =========================
+   Back Button
+   ========================= */
+
+.tickets-page .back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  border: none !important;
+  background: transparent !important;
+
+  color: #6b7280 !important;
+
+  font-size: 14px !important;
+  font-weight: 600 !important;
+
+  padding: 0 !important;
+  margin: 0 0 12px 0 !important;
+
+  cursor: pointer !important;
+
+  appearance: none !important;
+  -webkit-appearance: none !important;
+
+  transition: all 0.2s ease;
+}
+
+.tickets-page .back-btn:hover {
+  color: #2563eb !important;
+  transform: translateX(-3px);
+}
+
+
+/* =========================
+   Header
+   ========================= */
+
+.tickets-header {
+  max-width: 1200px;
+  margin: 0 auto 30px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tickets-header h1 {
+  margin: 0 0 6px;
+
+  color: #1f2937;
+
+  font-size: 28px;
+}
+
+.tickets-header p {
+  margin: 0;
+
+  color: #6b7280;
+}
+
+
+/* =========================
+   Create Ticket Button
+   ========================= */
+
+.create-ticket-btn {
+  padding: 11px 20px;
+
+  border: none;
+  border-radius: 6px;
+
+  background: #2563eb;
+
+  color: white;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+}
+
+.create-ticket-btn:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+
+/* =========================
+   Tickets Card
+   ========================= */
+
+.tickets-card {
+  max-width: 1200px;
+  margin: 0 auto;
+
+  background: white;
+
+  border-radius: 12px;
+
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+
+  overflow: hidden;
+}
+
+
+/* =========================
+   Table Header
+   ========================= */
+
+.table-header {
+  padding: 25px;
+
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.table-header h2 {
+  margin: 0;
+
+  color: #1f2937;
+
+  font-size: 20px;
+}
+
+
+/* =========================
+   Table
+   ========================= */
+
+.tickets-table {
+  width: 100%;
+}
+
+.table-row {
+  display: grid;
+
+  grid-template-columns:
+    80px
+    2fr
+    1fr
+    1fr
+    1.2fr;
+
+  align-items: center;
+
+  min-height: 60px;
+
+  padding: 0 25px;
+
+  border-bottom: 1px solid #e5e7eb;
+
+  box-sizing: border-box;
+}
+
+
+/* Clickable Ticket Rows */
+
+.table-row:not(.table-head) {
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    transform 0.1s ease;
+}
+
+.table-row:not(.table-head):hover {
+  background: #f3f4f6;
+}
+
+.table-row:not(.table-head):active {
+  background: #e5e7eb;
+}
+
+
+.table-row:last-child {
+  border-bottom: none;
+}
+
+.table-row span {
+  color: #4b5563;
+
+  font-size: 14px;
+}
+
+
+/* =========================
+   Table Head
+   ========================= */
+
+.table-head {
+  background: #f9fafb;
+
+  min-height: 50px;
+
+  cursor: default;
+}
+
+.table-head span {
+  color: #374151;
+
+  font-weight: 600;
+
+  font-size: 13px;
+}
+
+
+/* =========================
+   Responsive
+   ========================= */
+
+@media (max-width: 768px) {
+
+  .tickets-page {
+    padding: 20px;
+  }
+
+  .tickets-header {
+    flex-direction: column;
+
+    align-items: flex-start;
+
+    gap: 20px;
+  }
+
+  .create-ticket-btn {
+    width: 100%;
+  }
+
+  .tickets-card {
+    overflow-x: auto;
+  }
+
+  .tickets-table {
+    min-width: 700px;
+  }
+
+}

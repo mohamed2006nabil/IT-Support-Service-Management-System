@@ -1,0 +1,71 @@
+<div class="tickets-page">
+
+  <button
+    type="button"
+    class="back-btn"
+    (click)="goBack()"
+  >
+    ← Back
+  </button>
+
+  <div class="tickets-header">
+
+    <div>
+      <h1>My Tickets</h1>
+      <p>View and manage your IT support requests.</p>
+    </div>
+
+    <button
+      class="create-ticket-btn"
+      (click)="goToCreateTicket()"
+    >
+      + Create Ticket
+    </button>
+
+  </div>
+
+  <div class="tickets-card">
+
+    <div class="table-header">
+      <h2>My Support Tickets</h2>
+    </div>
+
+    <div class="tickets-table">
+
+      <div class="table-row table-head">
+        <span>ID</span>
+        <span>Title</span>
+        <span>Priority</span>
+        <span>Status</span>
+        <span>Created</span>
+      </div>
+
+      <div
+      class="table-row"
+      *ngFor="let ticket of tickets()"
+      (click)="goToTicketDetails(ticket.id)"
+    >
+
+        <span>#{{ ticket.id }}</span>
+
+        <span>{{ ticket.title }}</span>
+
+        <span>
+          {{ getPriorityName(ticket.priorityId) }}
+        </span>
+
+        <span>
+          {{ getStatusName(ticket.statusId) }}
+        </span>
+
+        <span>
+          {{ ticket.createdAt | date:'dd/MM/yyyy' }}
+        </span>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

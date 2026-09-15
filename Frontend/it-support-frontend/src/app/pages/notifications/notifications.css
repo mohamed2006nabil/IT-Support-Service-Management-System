@@ -1,0 +1,355 @@
+/* =========================
+   Notifications Page
+   ========================= */
+
+.notifications-page {
+  min-height: 100vh;
+
+  background: #f4f6f9;
+
+  padding: 40px;
+
+  box-sizing: border-box;
+}
+
+
+/* =========================
+   Header
+   ========================= */
+
+.notifications-header {
+  max-width: 900px;
+
+  margin: 0 auto 30px;
+}
+
+.notifications-header h1 {
+  margin: 0 0 6px;
+
+  color: #1f2937;
+
+  font-size: 28px;
+}
+
+.notifications-header p {
+  margin: 0;
+
+  color: #6b7280;
+
+  font-size: 15px;
+}
+
+
+/* =========================
+   Back Button
+   ========================= */
+
+.back-btn {
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 6px;
+
+  border: none;
+
+  background: transparent;
+
+  color: #6b7280;
+
+  font-size: 14px;
+
+  font-weight: 600;
+
+  padding: 0;
+
+  margin-bottom: 12px;
+
+  cursor: pointer;
+
+  appearance: none;
+
+  -webkit-appearance: none;
+
+  transition: all 0.2s ease;
+}
+
+.back-btn:hover {
+  color: #2563eb;
+
+  transform: translateX(-3px);
+}
+
+
+/* =========================
+   Notifications Card
+   ========================= */
+
+.notifications-card {
+  max-width: 900px;
+
+  margin: 0 auto;
+
+  background: white;
+
+  border-radius: 12px;
+
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+
+  overflow: hidden;
+}
+
+
+/* =========================
+   Card Header
+   ========================= */
+
+.card-header {
+  padding: 25px;
+
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.card-header h2 {
+  margin: 0;
+
+  color: #1f2937;
+
+  font-size: 20px;
+}
+
+/* Mark All as Read Button */
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.read-all-btn {
+  padding: 9px 16px;
+  border: none;
+  border-radius: 6px;
+  background: #2563eb;
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.read-all-btn:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+.read-all-btn:active {
+  transform: translateY(0);
+}
+
+/* =========================
+   Notifications List
+   ========================= */
+
+.notifications-list {
+  width: 100%;
+}
+
+
+/* =========================
+   Notification Item
+   ========================= */
+
+.notification-item {
+  display: flex;
+
+  align-items: center;
+
+  gap: 16px;
+
+  min-height: 95px;
+
+  padding: 18px 25px;
+
+  box-sizing: border-box;
+
+  border-bottom: 1px solid #e5e7eb;
+
+  transition: background 0.2s ease;
+}
+
+.notification-item:last-child {
+  border-bottom: none;
+}
+
+.notification-item:hover {
+  background: #f9fafb;
+}
+
+
+/* =========================
+   Notification Icon
+   ========================= */
+
+.notification-icon {
+  width: 42px;
+
+  height: 42px;
+
+  min-width: 42px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: #eff6ff;
+
+  font-size: 20px;
+}
+
+
+/* =========================
+   Notification Content
+   ========================= */
+
+.notification-content {
+  flex: 1;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 4px;
+}
+
+.notification-content h3 {
+  margin: 0;
+
+  color: #1f2937;
+
+  font-size: 15px;
+
+  font-weight: 600;
+}
+
+.notification-content p {
+  margin: 0;
+
+  color: #6b7280;
+
+  font-size: 13px;
+
+  line-height: 1.5;
+}
+
+.notification-content span {
+  color: #9ca3af;
+
+  font-size: 12px;
+}
+
+
+/* =========================
+   Notification Status
+   ========================= */
+
+.notification-status {
+  padding: 5px 10px;
+
+  border-radius: 20px;
+
+  background: #f3f4f6;
+
+  color: #6b7280;
+
+  font-size: 12px;
+
+  font-weight: 600;
+}
+
+.notification-status.unread {
+  background: #dbeafe;
+
+  color: #2563eb;
+}
+
+
+/* =========================
+   Empty State
+   ========================= */
+
+.empty-notifications {
+  padding: 60px 25px;
+
+  text-align: center;
+}
+
+.empty-notifications > div {
+  font-size: 40px;
+
+  margin-bottom: 15px;
+}
+
+.empty-notifications h3 {
+  margin: 0 0 6px;
+
+  color: #1f2937;
+
+  font-size: 18px;
+}
+
+.empty-notifications p {
+  margin: 0;
+
+  color: #6b7280;
+
+  font-size: 14px;
+}
+
+
+/* =========================
+   Responsive
+   ========================= */
+
+@media (max-width: 768px) {
+
+  .notifications-page {
+    padding: 20px;
+  }
+
+  .notification-item {
+    align-items: flex-start;
+
+    padding: 18px;
+  }
+
+  .notification-status {
+    font-size: 11px;
+
+    padding: 4px 8px;
+  }
+
+}
+
+
+@media (max-width: 600px) {
+
+  .notification-item {
+    flex-wrap: wrap;
+  }
+
+  .notification-content {
+    min-width: 0;
+
+    flex-basis: calc(100% - 58px);
+  }
+
+  .notification-status {
+    margin-left: 58px;
+  }
+
+}

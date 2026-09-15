@@ -1,0 +1,1050 @@
+<div class="admin-users-page">
+
+  <header class="page-header">
+    <div class="breadcrumb" aria-label="Breadcrumb">
+      <button type="button" class="breadcrumb-link" (click)="goBack()">
+        Home
+      </button>
+      <span class="breadcrumb-separator" aria-hidden="true">/</span>
+      <span class="breadcrumb-current">Users</span>
+    </div>
+
+    <div class="page-heading">
+      <div class="page-heading-copy">
+        <span class="page-kicker">ADMINISTRATION</span>
+        <h1>Users Management</h1>
+        <p>
+          Manage employees, IT agents, and administrators.
+          Control access, roles, and account status.
+        </p>
+      </div>
+
+      <button
+        type="button"
+        class="add-user-btn"
+        (click)="openAddUser()"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 5v14" />
+          <path d="M5 12h14" />
+        </svg>
+        <span>Add User</span>
+      </button>
+    </div>
+  </header>
+
+
+  <section class="users-stats" aria-label="User statistics">
+
+    <article class="stat-card stat-card-primary">
+      <div class="stat-icon">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+        </svg>
+      </div>
+      <div class="stat-content">
+        <span class="stat-label">Total Users</span>
+        <strong class="stat-value">{{ totalUsers() }}</strong>
+        <span class="stat-description">All system accounts</span>
+      </div>
+    </article>
+
+    <article class="stat-card stat-card-success">
+      <div class="stat-icon">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="9" />
+          <path d="m8 12 2.5 2.5L16 9" />
+        </svg>
+      </div>
+      <div class="stat-content">
+        <span class="stat-label">Active Users</span>
+        <strong class="stat-value">{{ activeUsers() }}</strong>
+        <span class="stat-description">Currently active</span>
+      </div>
+    </article>
+
+    <article class="stat-card stat-card-teal">
+      <div class="stat-icon">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 13a8 8 0 0 1 16 0" />
+          <path d="M4 13v4a2 2 0 0 0 2 2h1v-6H4Z" />
+          <path d="M20 13v4a2 2 0 0 1-2 2h-1v-6h3Z" />
+          <path d="M9 19h6" />
+        </svg>
+      </div>
+      <div class="stat-content">
+        <span class="stat-label">IT Agents</span>
+        <strong class="stat-value">{{ agentUsers() }}</strong>
+        <span class="stat-description">Technical support staff</span>
+      </div>
+    </article>
+
+    <article class="stat-card stat-card-blue">
+      <div class="stat-icon">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="7" r="4" />
+          <path d="M4 21v-1a8 8 0 0 1 16 0v1" />
+        </svg>
+      </div>
+      <div class="stat-content">
+        <span class="stat-label">Employees</span>
+        <strong class="stat-value">{{ employeeUsers() }}</strong>
+        <span class="stat-description">End users</span>
+      </div>
+    </article>
+
+    <article class="stat-card stat-card-purple">
+      <div class="stat-icon">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 3 20 6v5c0 5-3.4 8.7-8 10-4.6-1.3-8-5-8-10V6l8-3Z" />
+          <path d="m9.5 12 1.7 1.7 3.5-3.5" />
+        </svg>
+      </div>
+      <div class="stat-content">
+        <span class="stat-label">Administrators</span>
+        <strong class="stat-value">{{ adminUsers() }}</strong>
+        <span class="stat-description">System administrators</span>
+      </div>
+    </article>
+
+  </section>
+
+
+  <div class="users-content-grid">
+
+    <section class="users-main-card">
+
+      <div class="users-card-header">
+        <div class="users-card-heading">
+          <span class="section-kicker">DIRECTORY</span>
+          <h2>System Users</h2>
+          <p>
+            {{ filteredUsers().length }} of {{ totalUsers() }} users displayed
+          </p>
+        </div>
+
+
+      </div>
+
+
+      <div class="users-filters">
+
+        <label class="search-field">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="11" cy="11" r="7" />
+            <path d="m20 20-4-4" />
+          </svg>
+
+          <input
+            type="text"
+            [ngModel]="searchTerm()"
+            (ngModelChange)="searchTerm.set($event)"
+            placeholder="Search users, emails, departments, or roles..."
+            aria-label="Search users"
+          />
+
+          <button
+            *ngIf="searchTerm()"
+            type="button"
+            class="clear-search"
+            (click)="searchTerm.set('')"
+            aria-label="Clear search"
+          >
+            ×
+          </button>
+        </label>
+
+        <select
+          class="filter-select"
+          [ngModel]="selectedRoleId()"
+          (ngModelChange)="selectedRoleId.set(+$event)"
+          aria-label="Filter users by role"
+        >
+          <option [ngValue]="0">All Roles</option>
+          <option
+            *ngFor="let role of roles()"
+            [ngValue]="role.id"
+          >
+            {{ role.name }}
+          </option>
+        </select>
+
+        <button
+          type="button"
+          class="filter-reset-btn"
+          (click)="clearFilters()"
+        >
+          Reset
+        </button>
+
+      </div>
+
+
+      <div class="table-wrapper">
+
+        <table class="users-table">
+
+          <thead>
+            <tr>
+              <th class="select-column">
+                <span class="sr-only">Select</span>
+              </th>
+              <th>#</th>
+              <th>User</th>
+              <th>Email</th>
+              <th>Department</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th class="actions-column">Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            <tr *ngFor="let user of filteredUsers()">
+
+              <td class="select-column">
+                <input
+                  type="checkbox"
+                  class="row-checkbox"
+                  [attr.aria-label]="'Select ' + user.fullName"
+                />
+              </td>
+
+              <td class="id-cell">
+                #{{ user.id }}
+              </td>
+
+              <td>
+                <div class="user-info">
+
+                  <span class="user-avatar">
+                    <img
+                      *ngIf="user.profileImagePath"
+                      [src]="usersService.getProfileImageUrl(user.profileImagePath)"
+                      [alt]="user.fullName"
+                    />
+
+                    <span
+                      *ngIf="!user.profileImagePath"
+                      aria-hidden="true"
+                    >
+                      {{ user.fullName.charAt(0).toUpperCase() }}
+                    </span>
+                  </span>
+
+                  <div class="user-details">
+                    <strong [title]="user.fullName">
+                      {{ user.fullName }}
+                    </strong>
+                    <span>
+                      {{ user.roleName }}
+                    </span>
+                  </div>
+
+                </div>
+              </td>
+
+              <td
+                class="email-cell"
+                [title]="user.email"
+              >
+                {{ user.email }}
+              </td>
+
+              <td>
+                <span
+                  class="department-value"
+                  [class.department-none]="!user.departmentName"
+                  [title]="user.departmentName || 'No department'"
+                >
+                  {{ user.departmentName || 'N/A' }}
+                </span>
+              </td>
+
+              <td>
+                <span
+                  class="role-badge"
+                  [class.role-employee]="user.roleName === 'Employee'"
+                  [class.role-agent]="user.roleName === 'IT Agent'"
+                  [class.role-admin]="user.roleName === 'Admin'"
+                  [class.role-default]="
+                    user.roleName !== 'Employee' &&
+                    user.roleName !== 'IT Agent' &&
+                    user.roleName !== 'Admin'
+                  "
+                >
+                  <span class="badge-dot"></span>
+                  {{ user.roleName }}
+                </span>
+              </td>
+
+              <td>
+                <span
+                  class="status-badge"
+                  [class.active]="user.isActive"
+                  [class.inactive]="!user.isActive"
+                >
+                  <span class="status-dot"></span>
+                  {{ user.isActive ? 'Active' : 'Inactive' }}
+                </span>
+              </td>
+
+              <td class="created-cell">
+                <span>
+                  {{ user.createdAt | date:'MMM d, y' }}
+                </span>
+                <small>
+                  {{ user.createdAt | date:'h:mm a' }}
+                </small>
+              </td>
+
+              <td class="actions-column">
+                <div class="row-actions">
+
+                  <button
+                    type="button"
+                    class="icon-action edit-action"
+                    (click)="openEditUser(user)"
+                    [attr.aria-label]="'Edit ' + user.fullName"
+                    title="Edit user"
+                    data-tooltip="Edit user"
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M12 20h9" />
+                      <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4L16.5 3.5Z" />
+                    </svg>
+                  </button>
+
+                  <button
+                    type="button"
+                    class="icon-action status-action"
+                    [class.activate-action]="!user.isActive"
+                    [class.deactivate-action]="user.isActive"
+                    (click)="toggleUserStatus(user)"
+                    [attr.aria-label]="
+                      user.isActive
+                        ? 'Deactivate ' + user.fullName
+                        : 'Activate ' + user.fullName
+                    "
+                    [attr.data-tooltip]="
+                      user.isActive
+                        ? 'Deactivate user'
+                        : 'Activate user'
+                    "
+                  >
+                    <!-- Active account: clear power/off action -->
+                    <svg
+                      *ngIf="user.isActive"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                    >
+                      <path d="M12 2v9" />
+                      <path d="M7.05 4.93a9 9 0 1 0 9.9 0" />
+                    </svg>
+
+                    <!-- Inactive account: clear activate/play action -->
+                    <svg
+                      *ngIf="!user.isActive"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                    >
+                      <circle cx="12" cy="12" r="9" />
+                      <path d="m10 8 6 4-6 4V8Z" />
+                    </svg>
+                  </button>
+
+                  <button
+                    type="button"
+                    class="icon-action delete-action"
+                    (click)="deleteUser(user)"
+                    [attr.aria-label]="'Delete ' + user.fullName"
+                    title="Delete user"
+                    data-tooltip="Delete user"
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M3 6h18" />
+                      <path d="M8 6V4h8v2" />
+                      <path d="M19 6l-1 14H6L5 6" />
+                      <path d="M10 11v5" />
+                      <path d="M14 11v5" />
+                    </svg>
+                  </button>
+
+                </div>
+              </td>
+
+            </tr>
+
+
+            <tr
+              *ngIf="
+                totalUsers() > 0 &&
+                filteredUsers().length === 0
+              "
+            >
+              <td colspan="9" class="empty-cell">
+                <div class="empty-state">
+                  <div class="empty-icon">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <circle cx="11" cy="11" r="7" />
+                      <path d="m20 20-4-4" />
+                    </svg>
+                  </div>
+                  <h3>No users found</h3>
+                  <p>No users match the current filters.</p>
+                  <button
+                    type="button"
+                    class="empty-action"
+                    (click)="clearFilters()"
+                  >
+                    Clear filters
+                  </button>
+                </div>
+              </td>
+            </tr>
+
+
+            <tr *ngIf="totalUsers() === 0">
+              <td colspan="9" class="empty-cell">
+                <div class="empty-state">
+                  <div class="empty-icon">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                      <circle cx="9" cy="7" r="4" />
+                    </svg>
+                  </div>
+                  <h3>No users available</h3>
+                  <p>There are currently no users to display.</p>
+                </div>
+              </td>
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+
+      <footer class="table-footer">
+        <div class="table-footer-info">
+          Showing <strong>{{ filteredUsers().length }}</strong> users
+        </div>
+
+        <div class="pagination">
+          <button
+            type="button"
+            class="pagination-btn"
+            disabled
+            aria-label="Previous page"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="m15 18-6-6 6-6" />
+            </svg>
+          </button>
+
+          <button
+            type="button"
+            class="pagination-btn current"
+            aria-current="page"
+          >
+            1
+          </button>
+
+          <button
+            type="button"
+            class="pagination-btn"
+            disabled
+            aria-label="Next page"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="m9 18 6-6-6-6" />
+            </svg>
+          </button>
+        </div>
+      </footer>
+
+    </section>
+
+
+    <aside class="users-side-panel">
+
+      <section class="side-card system-health-card">
+        <div class="side-card-header">
+          <div>
+            <span class="side-card-eyebrow">DIRECTORY</span>
+            <h3>Account Health</h3>
+          </div>
+
+          <span class="health-indicator">
+            <span></span>
+            Operational
+          </span>
+        </div>
+
+        <div class="health-content">
+          <div
+            class="health-circle"
+            [style.--health-progress.%]="
+              totalUsers()
+                ? (activeUsers() / totalUsers()) * 100
+                : 0
+            "
+          >
+            <strong>{{ totalUsers() ? getPercentage(activeUsers()) : 0 }}%</strong>
+            <span>Active</span>
+          </div>
+
+          <div class="health-details">
+            <div>
+              <span class="health-dot active-dot"></span>
+              <span>Active</span>
+              <strong>{{ activeUsers() }}</strong>
+            </div>
+
+            <div>
+              <span class="health-dot inactive-dot"></span>
+              <span>Inactive</span>
+              <strong>{{ inactiveUsers() }}</strong>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <section class="side-card">
+        <div class="side-card-header">
+          <div>
+            <span class="side-card-eyebrow">ACCESS</span>
+            <h3>Role Distribution</h3>
+          </div>
+        </div>
+
+        <div class="role-distribution">
+
+          <div class="distribution-item">
+            <div class="distribution-top">
+              <div class="distribution-label">
+                <span class="distribution-icon agent-icon">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4 13a8 8 0 0 1 16 0" />
+                    <path d="M4 13v4a2 2 0 0 0 2 2h1v-6H4Z" />
+                    <path d="M20 13v4a2 2 0 0 1-2 2h-1v-6h3Z" />
+                  </svg>
+                </span>
+                <span>IT Agents</span>
+              </div>
+              <strong>{{ agentUsers() }}</strong>
+            </div>
+            <div class="distribution-bar">
+              <span
+                class="distribution-fill agent-fill"
+                [style.width.%]="agentPercentage()"
+              ></span>
+            </div>
+          </div>
+
+
+          <div class="distribution-item">
+            <div class="distribution-top">
+              <div class="distribution-label">
+                <span class="distribution-icon employee-icon">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="12" cy="7" r="4" />
+                    <path d="M4 21v-1a8 8 0 0 1 16 0v1" />
+                  </svg>
+                </span>
+                <span>Employees</span>
+              </div>
+              <strong>{{ employeeUsers() }}</strong>
+            </div>
+            <div class="distribution-bar">
+              <span
+                class="distribution-fill employee-fill"
+                [style.width.%]="employeePercentage()"
+              ></span>
+            </div>
+          </div>
+
+
+          <div class="distribution-item">
+            <div class="distribution-top">
+              <div class="distribution-label">
+                <span class="distribution-icon admin-icon">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 3 20 6v5c0 5-3.4 8.7-8 10-4.6-1.3-8-5-8-10V6l8-3Z" />
+                  </svg>
+                </span>
+                <span>Administrators</span>
+              </div>
+              <strong>{{ adminUsers() }}</strong>
+            </div>
+            <div class="distribution-bar">
+              <span
+                class="distribution-fill admin-fill"
+                [style.width.%]="adminPercentage()"
+              ></span>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+
+      <section class="side-card account-summary-card">
+        <div class="side-card-header">
+          <div>
+            <span class="side-card-eyebrow">OVERVIEW</span>
+            <h3>Account Status</h3>
+          </div>
+        </div>
+
+        <div class="account-summary">
+          <div class="summary-row">
+            <span>Active accounts</span>
+            <strong class="summary-success">{{ activeUsers() }}</strong>
+          </div>
+
+          <div class="summary-row">
+            <span>Inactive accounts</span>
+            <strong class="summary-danger">{{ inactiveUsers() }}</strong>
+          </div>
+
+          <div class="summary-row">
+            <span>Total accounts</span>
+            <strong>{{ totalUsers() }}</strong>
+          </div>
+        </div>
+      </section>
+
+
+      <section class="side-card support-card">
+        <div class="support-icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 3 20 6v5c0 5-3.4 8.7-8 10-4.6-1.3-8-5-8-10V6l8-3Z" />
+            <path d="M9 12h6" />
+            <path d="M12 9v6" />
+          </svg>
+        </div>
+
+        <div>
+          <h3>Better Support.</h3>
+          <p>
+            Manage access and keep your support team connected.
+          </p>
+        </div>
+      </section>
+
+    </aside>
+
+  </div>
+
+
+  <!-- Add User -->
+  <div
+    class="modal-overlay"
+    *ngIf="showAddUser()"
+  >
+    <section
+      class="user-modal"
+      aria-labelledby="add-user-title"
+      role="dialog"
+      aria-modal="true"
+    >
+      <header class="modal-header">
+        <div>
+          <span class="modal-eyebrow">USER MANAGEMENT</span>
+          <h2 id="add-user-title">Add New User</h2>
+          <p>Create a new account for the system.</p>
+        </div>
+
+        <button
+          type="button"
+          class="close-btn"
+          (click)="closeAddUser()"
+          aria-label="Close dialog"
+        >
+          ×
+        </button>
+      </header>
+
+      <form
+        class="user-form"
+        (submit)="$event.preventDefault(); createUser()"
+      >
+        <div class="form-grid">
+
+          <div class="form-group form-group-wide">
+            <label for="addFullName">Full Name</label>
+            <input
+              id="addFullName"
+              type="text"
+              name="addFullName"
+              [(ngModel)]="newUser.fullName"
+              placeholder="Enter full name"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="addEmail">Email</label>
+            <input
+              id="addEmail"
+              type="email"
+              name="addEmail"
+              [(ngModel)]="newUser.email"
+              placeholder="Enter email address"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="addPhone">Phone</label>
+            <input
+              id="addPhone"
+              type="text"
+              name="addPhone"
+              [(ngModel)]="newUser.phone"
+              placeholder="Enter phone number"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="addPassword">Password</label>
+            <input
+              id="addPassword"
+              type="password"
+              name="addPassword"
+              [(ngModel)]="newUser.passwordHash"
+              placeholder="Enter password"
+            />
+            <span class="field-hint">
+              Minimum 6 characters.
+            </span>
+          </div>
+
+          <div class="form-group">
+            <label for="addRole">Role</label>
+            <select
+              id="addRole"
+              name="addRole"
+              [ngModel]="newUser.roleId"
+              (ngModelChange)="onNewUserRoleChange($event)"
+            >
+              <option [ngValue]="0">Select Role</option>
+              <option
+                *ngFor="let role of roles()"
+                [ngValue]="role.id"
+              >
+                {{ role.name }}
+              </option>
+            </select>
+          </div>
+
+          <div
+            class="form-group"
+            *ngIf="isDepartmentRequired(newUser.roleId)"
+          >
+            <label for="addDepartment">Department</label>
+            <select
+              id="addDepartment"
+              name="addDepartment"
+              [(ngModel)]="newUser.departmentId"
+            >
+              <option [ngValue]="null">Select Department</option>
+              <option
+                *ngFor="let department of departments()"
+                [ngValue]="department.id"
+              >
+                {{ department.name }}
+              </option>
+            </select>
+          </div>
+
+        </div>
+
+        <label class="checkbox-field">
+          <input
+            type="checkbox"
+            name="addIsActive"
+            [(ngModel)]="newUser.isActive"
+          />
+          <span>Active User</span>
+        </label>
+
+        <div class="form-actions">
+          <button
+            type="button"
+            class="secondary-btn"
+            (click)="closeAddUser()"
+          >
+            Cancel
+          </button>
+          <button type="submit" class="primary-btn">
+            Create User
+          </button>
+        </div>
+      </form>
+    </section>
+  </div>
+
+
+  <!-- Edit User -->
+  <div
+    class="modal-overlay"
+    *ngIf="showEditUser()"
+  >
+    <section
+      class="user-modal"
+      aria-labelledby="edit-user-title"
+      role="dialog"
+      aria-modal="true"
+    >
+      <header class="modal-header">
+        <div>
+          <span class="modal-eyebrow">USER MANAGEMENT</span>
+          <h2 id="edit-user-title">Edit User</h2>
+          <p>Update the selected user's information.</p>
+        </div>
+
+        <button
+          type="button"
+          class="close-btn"
+          (click)="closeEditUser()"
+          aria-label="Close dialog"
+        >
+          ×
+        </button>
+      </header>
+
+      <form
+        class="user-form"
+        (submit)="$event.preventDefault(); updateUser()"
+      >
+        <div class="form-grid">
+
+          <div class="form-group form-group-wide">
+            <label for="editFullName">Full Name</label>
+            <input
+              id="editFullName"
+              type="text"
+              name="editFullName"
+              [(ngModel)]="editUser.fullName"
+              placeholder="Enter full name"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="editEmail">Email</label>
+            <input
+              id="editEmail"
+              type="email"
+              name="editEmail"
+              [(ngModel)]="editUser.email"
+              placeholder="Enter email address"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="editPhone">Phone</label>
+            <input
+              id="editPhone"
+              type="text"
+              name="editPhone"
+              [(ngModel)]="editUser.phone"
+              placeholder="Enter phone number"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="editPassword">New Password</label>
+            <input
+              id="editPassword"
+              type="password"
+              name="editPassword"
+              [(ngModel)]="editUser.passwordHash"
+              placeholder="Enter new password"
+            />
+            <span class="field-hint">
+              Leave empty to keep the current password.
+            </span>
+          </div>
+
+          <div class="form-group">
+            <label for="editRole">Role</label>
+            <select
+              id="editRole"
+              name="editRole"
+              [ngModel]="editUser.roleId"
+              (ngModelChange)="onEditUserRoleChange($event)"
+            >
+              <option [ngValue]="0">Select Role</option>
+              <option
+                *ngFor="let role of roles()"
+                [ngValue]="role.id"
+              >
+                {{ role.name }}
+              </option>
+            </select>
+          </div>
+
+          <div
+            class="form-group"
+            *ngIf="isDepartmentRequired(editUser.roleId)"
+          >
+            <label for="editDepartment">Department</label>
+            <select
+              id="editDepartment"
+              name="editDepartment"
+              [(ngModel)]="editUser.departmentId"
+            >
+              <option [ngValue]="null">Select Department</option>
+              <option
+                *ngFor="let department of departments()"
+                [ngValue]="department.id"
+              >
+                {{ department.name }}
+              </option>
+            </select>
+          </div>
+
+        </div>
+
+        <label class="checkbox-field">
+          <input
+            type="checkbox"
+            name="editIsActive"
+            [(ngModel)]="editUser.isActive"
+          />
+          <span>Active User</span>
+        </label>
+
+        <div class="form-actions">
+          <button
+            type="button"
+            class="secondary-btn"
+            (click)="closeEditUser()"
+          >
+            Cancel
+          </button>
+          <button type="submit" class="primary-btn">
+            Save Changes
+          </button>
+        </div>
+      </form>
+    </section>
+  </div>
+
+
+  <!-- Delete Confirmation -->
+  <div
+    class="modal-overlay"
+    *ngIf="showDeleteConfirm()"
+  >
+    <section
+      class="confirm-modal"
+      aria-labelledby="delete-user-title"
+      role="dialog"
+      aria-modal="true"
+    >
+      <div class="confirm-icon">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 9v4" />
+          <path d="M12 17h.01" />
+          <path d="M10.3 3.6 2.7 17a2 2 0 0 0 1.7 3h15.2a2 2 0 0 0 1.7-3L13.7 3.6a2 2 0 0 0-3.4 0Z" />
+        </svg>
+      </div>
+
+      <span class="modal-eyebrow">PERMANENT ACTION</span>
+
+      <h2 id="delete-user-title">Delete User?</h2>
+
+      <p>
+        Are you sure you want to delete
+        <strong>{{ selectedUserForDelete?.fullName }}</strong>?
+      </p>
+
+      <span class="confirm-note">
+        This action cannot be undone.
+      </span>
+
+      <div class="confirm-actions">
+        <button
+          type="button"
+          class="secondary-btn"
+          (click)="closeDeleteConfirm()"
+        >
+          Cancel
+        </button>
+
+        <button
+          type="button"
+          class="danger-btn"
+          (click)="confirmDeleteUser()"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M3 6h18" />
+            <path d="M8 6V4h8v2" />
+            <path d="M19 6l-1 14H6L5 6" />
+          </svg>
+          Delete User
+        </button>
+      </div>
+    </section>
+  </div>
+
+
+  <!-- Result Message -->
+  <div
+    class="modal-overlay"
+    *ngIf="showMessage()"
+  >
+    <section
+      class="message-modal"
+      [class.success]="messageType() === 'success'"
+      [class.error]="messageType() === 'error'"
+      aria-labelledby="message-title"
+      role="dialog"
+      aria-modal="true"
+    >
+      <div class="message-icon">
+        <svg
+          *ngIf="messageType() === 'success'"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path d="m5 12 4 4L19 6" />
+        </svg>
+
+        <svg
+          *ngIf="messageType() === 'error'"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path d="M12 8v4" />
+          <path d="M12 16h.01" />
+        </svg>
+      </div>
+
+      <span class="modal-eyebrow">SYSTEM MESSAGE</span>
+
+      <h2 id="message-title">
+        {{ messageTitle() }}
+      </h2>
+
+      <p>
+        {{ messageText() }}
+      </p>
+
+      <button
+        type="button"
+        class="message-btn"
+        (click)="closeMessage()"
+      >
+        Continue
+      </button>
+    </section>
+  </div>

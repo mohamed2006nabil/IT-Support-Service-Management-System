@@ -1,0 +1,96 @@
+<div class="notifications-page">
+
+  <div class="notifications-header">
+
+    <div>
+      <button
+        type="button"
+        class="back-btn"
+        (click)="goBack()"
+      >
+        ← Back
+      </button>
+
+      <h1>Notifications</h1>
+
+      <p>
+        Stay updated with your latest IT support activities.
+      </p>
+    </div>
+
+  </div>
+
+
+  <div class="notifications-card">
+
+    <div class="card-header">
+  <h2>My Notifications</h2>
+
+  <button
+    type="button"
+    class="read-all-btn"
+    (click)="markAllAsRead()"
+  >
+    Mark All as Read
+  </button>
+</div>
+
+
+    <div class="notifications-list">
+
+        <div
+        class="notification-item"
+        *ngFor="let notification of notifications()"
+        (click)="markAsRead(notification)"
+        >
+
+        <div class="notification-icon">
+          🔔
+        </div>
+
+
+        <div class="notification-content">
+
+          <h3>
+            {{ notification.title }}
+          </h3>
+
+          <p>
+            {{ notification.message }}
+          </p>
+
+          <span>
+            Ticket #{{ notification.ticketId }}
+          </span>
+
+        </div>
+
+
+        <div
+          class="notification-status"
+          [class.unread]="!notification.isRead"
+        >
+          {{ notification.isRead ? 'Read' : 'New' }}
+        </div>
+
+      </div>
+
+
+      <div
+        class="empty-notifications"
+        *ngIf="notifications().length === 0"
+      >
+        <div>🔔</div>
+
+        <h3>No Notifications</h3>
+
+        <p>
+          You don't have any notifications yet.
+        </p>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

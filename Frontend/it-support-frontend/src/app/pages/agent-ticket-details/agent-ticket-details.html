@@ -1,0 +1,745 @@
+<div class="agent-ticket-details-page">
+
+  <button
+    type="button"
+    class="back-btn"
+    (click)="goBack()"
+  >
+    ← Back to Assigned Tickets
+  </button>
+
+
+  <!-- Success Message -->
+
+  <div
+    class="toast-notification success-toast"
+    *ngIf="showSuccess()"
+  >
+
+    <div class="toast-icon">
+      ✓
+    </div>
+
+    <div class="toast-content">
+
+      <strong>
+        Ticket Updated Successfully
+      </strong>
+
+      <span>
+        Ticket status has been updated successfully.
+      </span>
+
+    </div>
+
+  </div>
+
+
+  <!-- Error Message -->
+
+  <div
+    class="toast-notification error-toast"
+    *ngIf="showError()"
+  >
+
+    <div class="toast-icon">
+      !
+    </div>
+
+    <div class="toast-content">
+
+      <strong>
+        Update Failed
+      </strong>
+
+      <span>
+        {{ errorMessage() }}
+      </span>
+
+    </div>
+
+  </div>
+
+
+  <!-- Ticket -->
+
+  <div
+    class="ticket-card"
+    *ngIf="ticket() as currentTicket"
+  >
+
+    <!-- Header -->
+
+    <div class="ticket-header">
+
+      <div>
+
+        <span class="ticket-label">
+          Ticket #{{ currentTicket.id }}
+        </span>
+
+        <h1>
+          {{ currentTicket.title }}
+        </h1>
+
+        <p>
+          IT Agent Ticket Details
+        </p>
+
+      </div>
+
+
+      <!-- Status -->
+
+      <div class="status-control">
+
+        <!-- Normal Mode -->
+
+        <div
+          class="current-status"
+          *ngIf="!isEditingStatus()"
+        >
+
+          <span class="status-title">
+            Ticket Status
+          </span>
+
+          <div class="status-display">
+
+            <span>
+              {{ getStatusName(currentTicket.statusId) }}
+            </span>
+
+            <button
+              type="button"
+              class="edit-btn"
+              (click)="startEditingStatus()"
+            >
+              Edit
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <!-- Edit Mode -->
+
+        <div
+          class="edit-status"
+          *ngIf="isEditingStatus()"
+        >
+
+          <label for="ticketStatus">
+            Ticket Status
+          </label>
+
+          <select
+            id="ticketStatus"
+            [ngModel]="selectedStatusId()"
+            (ngModelChange)="selectedStatusId.set($event)"
+            [disabled]="isSaving()"
+          >
+
+            <option
+              *ngFor="let status of getAvailableStatuses()"
+              [ngValue]="status.id"
+            >
+              {{ status.name }}
+            </option>
+
+          </select>
+
+
+          <div class="status-actions">
+
+            <button
+              type="button"
+              class="save-btn"
+              (click)="saveStatus()"
+              [disabled]="isSaving()"
+            >
+
+              <span
+                class="button-spinner"
+                *ngIf="isSaving()"
+              ></span>
+
+              <span *ngIf="!isSaving()">
+                Save Changes
+              </span>
+
+              <span *ngIf="isSaving()">
+                Saving...
+              </span>
+
+            </button>
+
+
+            <button
+              type="button"
+              class="cancel-btn"
+              (click)="cancelEditingStatus()"
+              [disabled]="isSaving()"
+            >
+              Cancel
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- Content -->
+
+    <div class="ticket-content">
+
+
+      <!-- Ticket Information -->
+
+      <div class="info-section">
+
+        <h2>
+          Ticket Information
+        </h2>
+
+        <div class="info-grid">
+
+          <div class="info-item">
+
+            <span class="info-label">
+              Ticket ID
+            </span>
+
+            <span class="info-value">
+              #{{ currentTicket.id }}
+            </span>
+
+          </div>
+
+
+          <div class="info-item">
+
+            <span class="info-label">
+              User ID
+            </span>
+
+            <span class="info-value">
+              {{ currentTicket.userId }}
+            </span>
+
+          </div>
+
+
+          <div class="info-item">
+
+            <span class="info-label">
+              Assigned To
+            </span>
+
+            <span class="info-value">
+              {{ currentTicket.assignedToId ?? 'Unassigned' }}
+            </span>
+
+          </div>
+
+
+          <div class="info-item">
+
+            <span class="info-label">
+              Priority
+            </span>
+
+            <span class="info-value">
+              #{{ currentTicket.priorityId }}
+            </span>
+
+          </div>
+
+
+          <div class="info-item">
+
+            <span class="info-label">
+              Category
+            </span>
+
+            <span class="info-value">
+              #{{ currentTicket.categoryId }}
+            </span>
+
+          </div>
+
+
+          <div class="info-item">
+
+            <span class="info-label">
+              Status
+            </span>
+
+            <span class="info-value">
+              {{ getStatusName(currentTicket.statusId) }}
+            </span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- Description -->
+
+      <div class="description-section">
+
+        <h2>
+          Description
+        </h2>
+
+        <div class="description-box">
+
+          {{ currentTicket.description }}
+
+        </div>
+
+      </div>
+
+
+      <!-- Comments -->
+
+      <div class="comments-section">
+
+        <h2>
+          Comments
+        </h2>
+
+
+        <!-- Add Comment -->
+
+        <div class="add-comment">
+
+          <textarea
+            placeholder="Write a comment..."
+            [ngModel]="newCommentText()"
+            (ngModelChange)="newCommentText.set($event)"
+            [disabled]="isAddingComment()"
+            rows="4"
+          ></textarea>
+
+
+          <div class="comment-actions">
+
+            <button
+              type="button"
+              class="add-comment-btn"
+              (click)="addComment()"
+              [disabled]="
+                isAddingComment() ||
+                !newCommentText().trim()
+              "
+            >
+
+              <span
+                class="button-spinner"
+                *ngIf="isAddingComment()"
+              ></span>
+
+              <span *ngIf="!isAddingComment()">
+                Add Comment
+              </span>
+
+              <span *ngIf="isAddingComment()">
+                Adding...
+              </span>
+
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <!-- No Comments -->
+
+        <div
+          class="no-comments"
+          *ngIf="comments().length === 0"
+        >
+
+          <div class="no-comments-icon">
+            💬
+          </div>
+
+          <p>
+            No comments yet.
+          </p>
+
+        </div>
+
+
+        <!-- Comments List -->
+
+        <div
+          class="comments-list"
+          *ngIf="comments().length > 0"
+        >
+
+          <div
+            class="comment-item"
+            *ngFor="let comment of comments()"
+          >
+
+            <div class="comment-header">
+
+              <div class="comment-user">
+
+                <div class="comment-avatar">
+
+                  {{
+                    comment.userName
+                      .charAt(0)
+                      .toUpperCase()
+                  }}
+
+                </div>
+
+
+                <div class="comment-user-info">
+
+                  <strong>
+                    {{ comment.userName }}
+                  </strong>
+
+                  <span>
+                    User #{{ comment.userId }}
+                  </span>
+
+                </div>
+
+              </div>
+
+
+              <span class="comment-date">
+
+                {{
+                  comment.createdAt
+                    | date:'dd/MM/yyyy HH:mm'
+                }}
+
+              </span>
+
+            </div>
+
+
+            <div class="comment-body">
+
+              {{ comment.commentText }}
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- Attachments -->
+
+      <div class="attachments-section">
+
+        <h2>
+          Attachments
+        </h2>
+
+
+        <!-- Upload Attachment -->
+
+        <div class="add-attachment">
+
+
+          <!-- Custom File Picker -->
+
+          <div class="file-input-wrapper">
+
+            <input
+              type="file"
+              id="attachmentFile"
+              #fileInput
+              (change)="onFileSelected($event)"
+              [disabled]="isUploadingAttachment()"
+            />
+
+
+            <div class="custom-file-picker">
+
+              <button
+                type="button"
+                class="choose-file-btn"
+                (click)="fileInput.click()"
+                [disabled]="isUploadingAttachment()"
+              >
+                Choose File
+              </button>
+
+
+              <span
+                class="file-name-display"
+                [class.has-file]="selectedFile()"
+              >
+                {{
+                  selectedFile()
+                    ? selectedFile()!.name
+                    : 'No file selected'
+                }}
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <!-- Selected File -->
+
+          <div
+            class="selected-file"
+            *ngIf="selectedFile()"
+          >
+
+            <span class="selected-file-name">
+              {{ selectedFile()?.name }}
+            </span>
+
+            <span class="selected-file-size">
+
+              {{
+                selectedFile()?.size
+                  ? (selectedFile()!.size / 1024 | number:'1.0-2')
+                  : 0
+              }}
+
+              KB
+
+            </span>
+
+          </div>
+
+
+          <!-- Upload -->
+
+          <div class="attachment-actions">
+
+            <button
+              type="button"
+              class="upload-attachment-btn"
+              (click)="uploadAttachment()"
+              [disabled]="
+                isUploadingAttachment() ||
+                !selectedFile()
+              "
+            >
+
+              <span
+                class="button-spinner"
+                *ngIf="isUploadingAttachment()"
+              ></span>
+
+              <span *ngIf="!isUploadingAttachment()">
+                Upload Attachment
+              </span>
+
+              <span *ngIf="isUploadingAttachment()">
+                Uploading...
+              </span>
+
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <!-- No Attachments -->
+
+        <div
+          class="no-attachments"
+          *ngIf="attachments().length === 0"
+        >
+
+          <div class="no-attachments-icon">
+            📎
+          </div>
+
+          <p>
+            No attachments yet.
+          </p>
+
+        </div>
+
+
+        <!-- Attachments List -->
+
+        <div
+          class="attachments-list"
+          *ngIf="attachments().length > 0"
+        >
+
+          <div
+            class="attachment-item"
+            *ngFor="let attachment of attachments()"
+          >
+
+            <div class="attachment-info">
+
+              <div class="attachment-icon">
+                📎
+              </div>
+
+
+              <div class="attachment-details">
+
+                <strong>
+                  {{ attachment.fileName }}
+                </strong>
+
+                <span>
+
+                  {{
+                    attachment.fileSize / 1024
+                      | number:'1.0-2'
+                  }}
+
+                  KB
+
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <div class="attachment-actions">
+
+              <button
+                type="button"
+                class="download-attachment-btn"
+                (click)="downloadAttachment(attachment)"
+              >
+                Download
+              </button>
+
+
+              <button
+                type="button"
+                class="delete-attachment-btn"
+                (click)="deleteAttachment(attachment)"
+              >
+                Delete
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- Delete Confirmation Modal -->
+
+  <div
+    class="delete-modal-overlay"
+    *ngIf="showDeleteModal()"
+    (click)="cancelDelete()"
+  >
+
+    <div
+      class="delete-modal"
+      (click)="$event.stopPropagation()"
+    >
+
+      <div class="delete-modal-icon">
+        !
+      </div>
+
+      <h3>
+        Delete Attachment?
+      </h3>
+
+      <p>
+        Are you sure you want to delete this attachment?
+
+        <span
+          class="delete-modal-file"
+          *ngIf="attachmentToDelete()"
+        >
+          {{ attachmentToDelete()!.fileName }}
+        </span>
+      </p>
+
+
+      <div class="delete-modal-actions">
+
+        <button
+          type="button"
+          class="modal-cancel-btn"
+          (click)="cancelDelete()"
+          [disabled]="isDeletingAttachment()"
+        >
+          Cancel
+        </button>
+
+
+        <button
+          type="button"
+          class="modal-delete-btn"
+          (click)="confirmDelete()"
+          [disabled]="isDeletingAttachment()"
+        >
+
+          <span
+            class="button-spinner"
+            *ngIf="isDeletingAttachment()"
+          ></span>
+
+          <span *ngIf="!isDeletingAttachment()">
+            Delete
+          </span>
+
+          <span *ngIf="isDeletingAttachment()">
+            Deleting...
+          </span>
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- Loading -->
+
+  <div
+    class="loading-card"
+    *ngIf="!ticket()"
+  >
+
+    <div class="loading-spinner"></div>
+
+    <p>
+      Loading ticket details...
+    </p>
+
+  </div>
+
+</div>

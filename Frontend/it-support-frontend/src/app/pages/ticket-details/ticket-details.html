@@ -1,0 +1,141 @@
+<div class="ticket-details-page">
+
+  <div class="ticket-details-header">
+
+    <button
+      type="button"
+      class="back-btn"
+      (click)="goBack()"
+    >
+      ← Back to Tickets
+    </button>
+
+    <h1>Ticket Details</h1>
+
+    <p>
+      View the details of your support ticket.
+    </p>
+
+  </div>
+
+
+  <div
+    class="ticket-card"
+    *ngIf="ticket() as currentTicket"
+  >
+
+    <div class="ticket-card-header">
+
+      <div>
+        <span class="ticket-id">
+          Ticket #{{ currentTicket.id }}
+        </span>
+
+        <h2>
+          {{ currentTicket.title }}
+        </h2>
+      </div>
+
+      <span class="status-badge">
+        Status #{{ currentTicket.statusId }}
+      </span>
+
+    </div>
+
+
+    <div class="ticket-description">
+
+      <h3>Description</h3>
+
+      <p>
+        {{ currentTicket.description }}
+      </p>
+
+    </div>
+
+
+    <div class="ticket-info-grid">
+
+      <div class="info-item">
+        <span class="info-label">Category</span>
+        <span class="info-value">
+          #{{ currentTicket.categoryId }}
+        </span>
+      </div>
+
+      <div class="info-item">
+        <span class="info-label">Priority</span>
+        <span class="info-value">
+          #{{ currentTicket.priorityId }}
+        </span>
+      </div>
+
+      <div class="info-item">
+        <span class="info-label">Created</span>
+        <span class="info-value">
+          {{ currentTicket.createdAt | date:'dd/MM/yyyy HH:mm' }}
+        </span>
+      </div>
+
+      <div class="info-item">
+        <span class="info-label">Assigned To</span>
+        <span class="info-value">
+          {{
+            currentTicket.assignedToId
+              ? '#' + currentTicket.assignedToId
+              : 'Not Assigned'
+          }}
+        </span>
+      </div>
+
+    </div>
+
+
+    <div class="ticket-dates">
+
+      <div>
+        <strong>Updated:</strong>
+
+        {{
+          currentTicket.updatedAt
+            ? (currentTicket.updatedAt | date:'dd/MM/yyyy HH:mm')
+            : 'Not updated yet'
+        }}
+
+      </div>
+
+      <div>
+        <strong>Resolved:</strong>
+
+        {{
+          currentTicket.resolvedAt
+            ? (currentTicket.resolvedAt | date:'dd/MM/yyyy HH:mm')
+            : 'Not resolved yet'
+        }}
+
+      </div>
+
+      <div>
+        <strong>Closed:</strong>
+
+        {{
+          currentTicket.closedAt
+            ? (currentTicket.closedAt | date:'dd/MM/yyyy HH:mm')
+            : 'Not closed yet'
+        }}
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <div
+    class="loading-state"
+    *ngIf="!ticket()"
+  >
+    <p>Loading ticket details...</p>
+  </div>
+
+</div>

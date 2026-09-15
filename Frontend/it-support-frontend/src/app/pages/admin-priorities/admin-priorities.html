@@ -1,0 +1,801 @@
+<div class="admin-priorities-page">
+
+  <header class="page-header">
+    <div class="page-header-main">
+      <div class="header-copy">
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+          <button type="button" class="breadcrumb-link" (click)="goBack()">Home</button>
+          <span class="breadcrumb-separator" aria-hidden="true">/</span>
+          <span class="breadcrumb-current">Priorities</span>
+        </nav>
+
+        <span class="eyebrow">ADMINISTRATION</span>
+        <h1>Priorities Management</h1>
+        <p>Manage ticket priority levels used by the support system.</p>
+      </div>
+
+      <div class="header-actions">
+        <div class="system-status">
+          <span class="system-status-dot" aria-hidden="true"></span>
+          <div>
+            <strong>System operational</strong>
+            <span>All services running</span>
+          </div>
+        </div>
+
+        <div class="header-divider" aria-hidden="true"></div>
+
+        <div class="header-updated">
+          <span class="updated-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="8.5"></circle>
+              <path d="M12 7v5l3 2"></path>
+            </svg>
+          </span>
+          <div>
+            <span>Last updated</span>
+            <strong>{{ formatLastUpdated(lastUpdated()) }}</strong>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="refresh-btn"
+          (click)="refreshPriorities()"
+          [disabled]="loading()"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M20 11a8 8 0 0 0-14.9-4"></path>
+            <path d="M5 3v4h4"></path>
+            <path d="M4 13a8 8 0 0 0 14.9 4"></path>
+            <path d="M19 21v-4h-4"></path>
+          </svg>
+          Refresh
+        </button>
+
+        <div class="profile-menu">
+          <button
+            type="button"
+            class="profile-trigger"
+            aria-haspopup="menu"
+            [attr.aria-expanded]="isProfileMenuOpen"
+            [attr.aria-label]="'Open profile menu for ' + adminUser().fullName"
+            (click)="toggleProfileMenu()"
+          >
+            <span class="profile-avatar">
+              <img
+                *ngIf="getProfileImageUrl()"
+                [src]="getProfileImageUrl()!"
+                [alt]="adminUser().fullName"
+                (error)="handleProfileImageError()"
+              />
+              <span *ngIf="!getProfileImageUrl()" aria-hidden="true">
+                {{ adminUser().fullName.charAt(0).toUpperCase() }}
+              </span>
+            </span>
+
+            <span class="profile-trigger-copy">
+              <strong>{{ adminUser().fullName }}</strong>
+              <small>{{ adminUser().role }}</small>
+            </span>
+
+            <svg class="profile-chevron" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="m7 10 5 5 5-5"></path>
+            </svg>
+          </button>
+
+          <div *ngIf="isProfileMenuOpen" class="profile-dropdown" role="menu">
+            <div class="profile-dropdown-header">
+              <strong>{{ adminUser().fullName }}</strong>
+              <span>{{ adminUser().role }}</span>
+            </div>
+
+            <div class="profile-dropdown-divider"></div>
+
+            <button
+              type="button"
+              class="profile-menu-item"
+              role="menuitem"
+              (click)="goToAdminProfile()"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="8" r="4"></circle>
+                <path d="M4 21a8 8 0 0 1 16 0"></path>
+              </svg>
+              <span>View profile</span>
+            </button>
+
+            <button
+              type="button"
+              class="profile-menu-item profile-menu-item-danger"
+              role="menuitem"
+              (click)="logout()"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M10 17l5-5-5-5"></path>
+                <path d="M15 12H3"></path>
+                <path d="M21 4v16"></path>
+              </svg>
+              <span>Logout</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section class="priority-stats" aria-label="Priority statistics">
+    <div class="stat-card">
+      <div class="stat-icon stat-icon-total" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M5 4h14v16H5z"></path><path d="M8 8h8M8 12h8M8 16h5"></path></svg>
+      </div>
+      <div>
+        <span>Total Priorities</span>
+        <strong>{{ priorities().length }}</strong>
+        <small>Configured levels</small>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon stat-icon-critical" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="m12 3 9 16H3L12 3Z"></path><path d="M12 9v5M12 17h.01"></path></svg>
+      </div>
+      <div>
+        <span>Critical</span>
+        <strong>{{ priorityCount('critical') }}</strong>
+        <small>Highest urgency</small>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon stat-icon-high" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M12 3v18M5 10l7-7 7 7"></path></svg>
+      </div>
+      <div>
+        <span>High</span>
+        <strong>{{ priorityCount('high') }}</strong>
+        <small>Important issues</small>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon stat-icon-standard" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"></circle><path d="M12 8v4l3 2"></path></svg>
+      </div>
+      <div>
+        <span>Standard</span>
+        <strong>{{ standardPriorityCount() }}</strong>
+        <small>Low / medium levels</small>
+      </div>
+    </div>
+  </section>
+
+  <!-- Directory -->
+  <section class="directory-card">
+    <div class="directory-header">
+      <div>
+        <span class="section-eyebrow">DIRECTORY</span>
+        <h2>System Priorities</h2>
+        <p>{{ filteredPriorities().length }} of {{ priorities().length }} priorities</p>
+      </div>
+
+      <button
+        type="button"
+        class="add-btn"
+        (click)="openAddModal()"
+      >
+        <span aria-hidden="true">+</span>
+        Add Priority
+      </button>
+    </div>
+
+    <div class="directory-toolbar">
+      <label class="search-box" aria-label="Search priorities">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="11" cy="11" r="6.5"></circle>
+          <path d="m16 16 4 4"></path>
+        </svg>
+        <input
+          type="text"
+          placeholder="Search priorities..."
+          [ngModel]="searchTerm()"
+          (ngModelChange)="onSearchChange($event)"
+        />
+        <button
+          *ngIf="searchTerm()"
+          type="button"
+          class="clear-search"
+          (click)="clearSearch()"
+          aria-label="Clear search"
+        >
+          ×
+        </button>
+      </label>
+
+      <button
+        *ngIf="searchTerm()"
+        type="button"
+        class="reset-btn"
+        (click)="clearSearch()"
+      >
+        Reset
+      </button>
+    </div>
+
+    <div *ngIf="loading()" class="loading-state">
+      <div class="spinner" aria-hidden="true"></div>
+      <p>Loading priorities...</p>
+    </div>
+
+    <div *ngIf="!loading()" class="table-wrapper">
+      <table class="priorities-table">
+        <thead>
+          <tr>
+            <th class="id-cell">#</th>
+            <th>PRIORITY</th>
+            <th>DESCRIPTION</th>
+            <th class="actions-cell">ACTIONS</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let priority of pagedPriorities()">
+            <td class="id-cell">#{{ priority.id }}</td>
+
+            <td>
+              <div class="priority-name">
+                <span class="priority-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path d="m13 2-8 12h6l-1 8 8-12h-6l1-8Z"></path>
+                  </svg>
+                </span>
+                <strong>{{ priority.name }}</strong>
+              </div>
+            </td>
+
+            <td class="description-cell">
+              {{ priority.description || 'No description' }}
+            </td>
+
+            <td class="actions-cell">
+              <div class="action-buttons">
+                <button
+                  type="button"
+                  class="action-btn view-btn"
+                  (click)="viewPriority(priority)"
+                  [attr.aria-label]="'View ' + priority.name"
+                >
+                  View
+                </button>
+
+                <button
+                  type="button"
+                  class="action-btn edit-btn"
+                  (click)="openEditModal(priority)"
+                  [attr.aria-label]="'Edit ' + priority.name"
+                >
+                  Edit
+                </button>
+
+                <button
+                  type="button"
+                  class="action-btn delete-btn"
+                  (click)="openDeleteModal(priority)"
+                  [attr.aria-label]="'Delete ' + priority.name"
+                >
+                  Delete
+                </button>
+              </div>
+            </td>
+          </tr>
+
+          <tr *ngIf="filteredPriorities().length === 0">
+            <td colspan="4" class="empty-priorities">
+              <div class="empty-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                  <path d="m13 2-8 12h6l-1 8 8-12h-6l1-8Z"></path>
+                </svg>
+              </div>
+
+              <h3>
+                {{ priorities().length > 0 ? 'No Matching Priorities' : 'No Priorities Found' }}
+              </h3>
+
+              <p>
+                {{ priorities().length > 0
+                  ? 'Try a different search term.'
+                  : 'There are no ticket priorities to display.' }}
+              </p>
+
+              <button
+                *ngIf="priorities().length > 0"
+                type="button"
+                class="empty-clear-btn"
+                (click)="clearSearch()"
+              >
+                Clear Search
+              </button>
+
+              <button
+                *ngIf="priorities().length === 0"
+                type="button"
+                class="empty-add-btn"
+                (click)="openAddModal()"
+              >
+                + Add First Priority
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div
+      *ngIf="!loading() && filteredPriorities().length > 0"
+      class="pagination"
+    >
+      <span>
+        Showing {{ pageStart() }} - {{ pageEnd() }} of {{ filteredPriorities().length }}
+      </span>
+
+      <div class="pagination-controls">
+        <button
+          type="button"
+          class="page-btn"
+          (click)="previousPage()"
+          [disabled]="currentPage() === 1"
+          aria-label="Previous page"
+        >
+          ‹
+        </button>
+
+        <button
+          *ngFor="let page of pageNumbers()"
+          type="button"
+          class="page-btn"
+          [class.active]="page === currentPage()"
+          (click)="goToPage(page)"
+        >
+          {{ page }}
+        </button>
+
+        <button
+          type="button"
+          class="page-btn"
+          (click)="nextPage()"
+          [disabled]="currentPage() === totalPages()"
+          aria-label="Next page"
+        >
+          ›
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Success / Error Message -->
+  <div
+    *ngIf="message()"
+    class="toast"
+    [class.toast-success]="messageType() === 'success'"
+    [class.toast-error]="messageType() === 'error'"
+  >
+
+    <span class="toast-icon">
+      {{
+        messageType() === 'success'
+          ? '✓'
+          : '!'
+      }}
+    </span>
+
+    <span>
+      {{ message() }}
+    </span>
+
+  </div>
+
+
+  <!-- View Modal -->
+  <div
+    *ngIf="showDetailsModal()"
+    class="modal-overlay"
+    (click)="closeDetails()"
+  >
+
+    <div
+      class="modal"
+      (click)="$event.stopPropagation()"
+    >
+
+      <div class="modal-header">
+
+        <div>
+
+          <span class="modal-label">
+            PRIORITY DETAILS
+          </span>
+
+          <h2>
+            {{ selectedPriority()?.name }}
+          </h2>
+
+        </div>
+
+        <button
+          type="button"
+          class="modal-close"
+          (click)="closeDetails()"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <div class="modal-body">
+
+        <div class="detail-item">
+
+          <span class="detail-label">
+            Priority ID
+          </span>
+
+          <strong>
+            #{{ selectedPriority()?.id }}
+          </strong>
+
+        </div>
+
+
+        <div class="detail-item">
+
+          <span class="detail-label">
+            Name
+          </span>
+
+          <strong>
+            {{ selectedPriority()?.name }}
+          </strong>
+
+        </div>
+
+
+        <div class="detail-item full-width">
+
+          <span class="detail-label">
+            Description
+          </span>
+
+          <p>
+            {{
+              selectedPriority()?.description ||
+              'No description provided.'
+            }}
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="modal-footer">
+
+        <button
+          type="button"
+          class="secondary-btn"
+          (click)="closeDetails()"
+        >
+          Close
+        </button>
+
+        <button
+          type="button"
+          class="primary-btn"
+          (click)="openEditModal(selectedPriority()!)"
+        >
+          Edit Priority
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- Add Modal -->
+  <div
+    *ngIf="showAddModal()"
+    class="modal-overlay"
+    (click)="closeAddModal()"
+  >
+
+    <div
+      class="modal"
+      (click)="$event.stopPropagation()"
+    >
+
+      <div class="modal-header">
+
+        <div>
+
+          <span class="modal-label">
+            CREATE PRIORITY
+          </span>
+
+          <h2>
+            Add New Priority
+          </h2>
+
+        </div>
+
+        <button
+          type="button"
+          class="modal-close"
+          (click)="closeAddModal()"
+          [disabled]="saving()"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <div class="modal-body">
+
+        <div class="form-group">
+
+          <label>
+            Priority Name
+            <span>*</span>
+          </label>
+
+          <input
+            type="text"
+            [(ngModel)]="newPriority.name"
+            placeholder="Enter priority name"
+            maxlength="100"
+          />
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+            Description
+          </label>
+
+          <textarea
+            [(ngModel)]="newPriority.description"
+            placeholder="Enter priority description"
+            rows="4"
+          ></textarea>
+
+        </div>
+
+      </div>
+
+
+      <div class="modal-footer">
+
+        <button
+          type="button"
+          class="secondary-btn"
+          (click)="closeAddModal()"
+          [disabled]="saving()"
+        >
+          Cancel
+        </button>
+
+        <button
+          type="button"
+          class="primary-btn"
+          (click)="createPriority()"
+          [disabled]="saving()"
+        >
+
+          <span
+            *ngIf="saving()"
+            class="button-spinner"
+          ></span>
+
+          {{
+            saving()
+              ? 'Creating...'
+              : 'Create Priority'
+          }}
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- Edit Modal -->
+  <div
+    *ngIf="showEditModal()"
+    class="modal-overlay"
+    (click)="closeEditModal()"
+  >
+
+    <div
+      class="modal"
+      (click)="$event.stopPropagation()"
+    >
+
+      <div class="modal-header">
+
+        <div>
+
+          <span class="modal-label">
+            EDIT PRIORITY
+          </span>
+
+          <h2>
+            Update Priority
+          </h2>
+
+        </div>
+
+        <button
+          type="button"
+          class="modal-close"
+          (click)="closeEditModal()"
+          [disabled]="saving()"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <div class="modal-body">
+
+        <div class="form-group">
+
+          <label>
+            Priority Name
+            <span>*</span>
+          </label>
+
+          <input
+            type="text"
+            [(ngModel)]="editPriority.name"
+            placeholder="Enter priority name"
+            maxlength="100"
+          />
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+            Description
+          </label>
+
+          <textarea
+            [(ngModel)]="editPriority.description"
+            placeholder="Enter priority description"
+            rows="4"
+          ></textarea>
+
+        </div>
+
+      </div>
+
+
+      <div class="modal-footer">
+
+        <button
+          type="button"
+          class="secondary-btn"
+          (click)="closeEditModal()"
+          [disabled]="saving()"
+        >
+          Cancel
+        </button>
+
+        <button
+          type="button"
+          class="primary-btn"
+          (click)="updatePriority()"
+          [disabled]="saving()"
+        >
+
+          <span
+            *ngIf="saving()"
+            class="button-spinner"
+          ></span>
+
+          {{
+            saving()
+              ? 'Saving...'
+              : 'Save Changes'
+          }}
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- Delete Modal -->
+  <div
+    *ngIf="showDeleteModal()"
+    class="modal-overlay"
+    (click)="closeDeleteModal()"
+  >
+
+    <div
+      class="modal delete-modal"
+      (click)="$event.stopPropagation()"
+    >
+
+      <div class="delete-icon">
+        ⚠
+      </div>
+
+      <h2>
+        Delete Priority?
+      </h2>
+
+      <p>
+        Are you sure you want to delete
+        <strong>
+          {{ priorityToDelete()?.name }}
+        </strong>
+       ?
+      </p>
+
+      <p class="delete-warning">
+        If this priority is already used by tickets,
+        the system will prevent the deletion.
+      </p>
+
+
+      <div class="modal-footer">
+
+        <button
+          type="button"
+          class="secondary-btn"
+          (click)="closeDeleteModal()"
+          [disabled]="deleting()"
+        >
+          Cancel
+        </button>
+
+        <button
+          type="button"
+          class="danger-btn"
+          (click)="confirmDelete()"
+          [disabled]="deleting()"
+        >
+
+          <span
+            *ngIf="deleting()"
+            class="button-spinner"
+          ></span>
+
+          {{
+            deleting()
+              ? 'Deleting...'
+              : 'Delete Priority'
+          }}
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

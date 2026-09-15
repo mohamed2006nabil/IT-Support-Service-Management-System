@@ -1,0 +1,1404 @@
+<div class="admin-dashboard">
+
+  <!-- =========================================================
+       Dashboard Header
+       ========================================================= -->
+
+  <header class="dashboard-header">
+    <div class="header-content">
+
+      <div class="header-copy">
+        <span class="eyebrow">ADMINISTRATION</span>
+
+        <h1>Operations dashboard</h1>
+
+        <p>
+          Monitor users, support tickets, and service activity from one place.
+        </p>
+      </div>
+
+      <div class="header-actions">
+
+        <div class="system-indicator">
+          <span class="status-dot" aria-hidden="true"></span>
+          <div>
+            <strong>System operational</strong>
+            <span>All services running</span>
+          </div>
+        </div>
+
+        <div class="header-divider" aria-hidden="true"></div>
+
+        <div class="last-updated">
+          <span class="last-updated-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="8"></circle>
+              <path d="M12 7v5l3 2"></path>
+            </svg>
+          </span>
+          <div>
+            <span>Last updated</span>
+            <strong>{{ lastUpdated }}</strong>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="secondary-button refresh-button"
+          (click)="refreshDashboard()"
+          [disabled]="isLoading"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M20 11a8 8 0 0 0-14-5l-2 2"></path>
+            <path d="M4 4v4h4"></path>
+            <path d="M4 13a8 8 0 0 0 14 5l2-2"></path>
+            <path d="M20 20v-4h-4"></path>
+          </svg>
+          <span>Refresh</span>
+        </button>
+
+        <div class="profile-menu">
+          <button
+            type="button"
+            class="profile-trigger"
+            aria-haspopup="menu"
+            [attr.aria-expanded]="isProfileMenuOpen"
+            (click)="toggleProfileMenu()"
+          >
+            <span class="profile-avatar">
+              <img
+                *ngIf="getProfileImageUrl() as profileImageUrl"
+                [src]="profileImageUrl"
+                alt=""
+                (error)="handleProfileImageError()"
+              />
+              <span *ngIf="!getProfileImageUrl()">
+                {{ (user?.fullName || 'Administrator').charAt(0).toUpperCase() }}
+              </span>
+            </span>
+
+            <span class="profile-trigger-copy">
+              <strong>{{ user?.fullName || 'Administrator' }}</strong>
+              <small>{{ user?.role || 'Admin' }}</small>
+            </span>
+
+            <svg class="profile-chevron" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="m7 10 5 5 5-5"></path>
+            </svg>
+          </button>
+
+          <div
+            *ngIf="isProfileMenuOpen"
+            class="profile-dropdown"
+            role="menu"
+          >
+            <div class="profile-dropdown-header">
+              <strong>{{ user?.fullName || 'Administrator' }}</strong>
+              <span>{{ user?.role || 'Admin' }}</span>
+            </div>
+
+            <div class="profile-dropdown-divider"></div>
+
+            <button
+              type="button"
+              class="profile-menu-item"
+              role="menuitem"
+              (click)="goToAdminProfile()"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="8" r="4"></circle>
+                <path d="M4 21a8 8 0 0 1 16 0"></path>
+              </svg>
+              <span>View profile</span>
+            </button>
+
+            <button
+              type="button"
+              class="profile-menu-item profile-menu-item-danger"
+              role="menuitem"
+              (click)="logout()"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M10 17l5-5-5-5"></path>
+                <path d="M15 12H3"></path>
+                <path d="M21 4v16"></path>
+              </svg>
+              <span>Logout</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </header>
+
+
+  <!-- =========================================================
+       Main Content
+       ========================================================= -->
+
+  <main class="dashboard-content">
+
+
+    <!-- =======================================================
+         Loading State
+         ======================================================= -->
+
+    <section
+      *ngIf="isLoading"
+      class="state-panel"
+      aria-live="polite"
+    >
+
+      <div
+        class="loading-indicator"
+        aria-hidden="true"
+      ></div>
+
+      <div class="state-copy">
+        <h2>Loading dashboard</h2>
+
+        <p>
+          Retrieving the latest system activity and statistics.
+        </p>
+      </div>
+
+    </section>
+
+
+    <!-- =======================================================
+         Error State
+         ======================================================= -->
+
+    <section
+      *ngIf="!isLoading && errorMessage"
+      class="state-panel error-state"
+      aria-live="assertive"
+    >
+
+      <div
+        class="state-icon"
+        aria-hidden="true"
+      >
+        <svg viewBox="0 0 24 24" focusable="false">
+          <circle cx="12" cy="12" r="9"></circle>
+          <path d="M12 7v6"></path>
+          <path d="M12 16h.01"></path>
+        </svg>
+      </div>
+
+      <div class="state-copy">
+
+        <h2>Dashboard unavailable</h2>
+
+        <p>
+          {{ errorMessage }}
+        </p>
+
+        <button
+          type="button"
+          class="primary-button"
+          (click)="retryLoadDashboard()"
+        >
+          Try again
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- =======================================================
+         Dashboard
+         ======================================================= -->
+
+    <ng-container
+      *ngIf="!isLoading && !errorMessage && dashboard"
+    >
+
+
+      <!-- =====================================================
+           System Overview
+           ===================================================== -->
+
+      <section class="overview-panel">
+
+        <div class="overview-content">
+
+          <span class="eyebrow">
+            SYSTEM OVERVIEW
+          </span>
+
+          <h2>
+            Welcome back, {{ user?.fullName || 'Administrator' }}
+          </h2>
+
+          <p>
+            Here is the current operational status of your IT support
+            environment.
+          </p>
+
+        </div>
+
+
+        <div class="system-status">
+
+          <span
+            class="status-dot"
+            aria-hidden="true"
+          ></span>
+
+          <div>
+            <strong>
+              System operational
+            </strong>
+
+            <span>
+              Live database statistics
+            </span>
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- =====================================================
+           Ticket Metrics
+           ===================================================== -->
+
+      <section
+        class="metrics-section"
+        aria-labelledby="ticket-metrics-title"
+      >
+
+        <div class="section-heading">
+
+          <div>
+            <span class="eyebrow">
+              SERVICE DESK
+            </span>
+
+            <h2 id="ticket-metrics-title">
+              Ticket overview
+            </h2>
+
+            <p>
+              Current workload and ticket lifecycle status.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            class="text-button"
+            (click)="goToAdminTickets()"
+          >
+            View tickets
+            <span aria-hidden="true">→</span>
+          </button>
+
+        </div>
+
+
+        <div class="metrics-grid">
+
+
+          <!-- Total -->
+
+          <article class="metric-card metric-card-primary">
+
+            <div class="metric-card-header">
+
+              <span class="metric-label">
+                Total tickets
+              </span>
+
+              <span
+                class="metric-icon"
+                aria-hidden="true"
+              >
+                <svg viewBox="0 0 24 24" focusable="false">
+                  <path d="M4 5h16v14H4z"></path>
+                  <path d="M8 9h8"></path>
+                  <path d="M8 13h5"></path>
+                </svg>
+              </span>
+
+            </div>
+
+            <strong class="metric-value">
+              {{ dashboard.tickets.total }}
+            </strong>
+
+            <span class="metric-caption">
+              All support requests
+            </span>
+
+          </article>
+
+
+          <!-- Open -->
+
+          <article class="metric-card">
+
+            <div class="metric-card-header">
+
+              <span class="metric-label">
+                Open
+              </span>
+
+              <span
+                class="metric-icon"
+                aria-hidden="true"
+              >
+                <svg viewBox="0 0 24 24" focusable="false">
+                  <circle cx="12" cy="12" r="8"></circle>
+                  <path d="M12 8v4l3 2"></path>
+                </svg>
+              </span>
+
+            </div>
+
+            <strong class="metric-value">
+              {{ dashboard.tickets.open }}
+            </strong>
+
+            <span class="metric-caption">
+              Awaiting support action
+            </span>
+
+          </article>
+
+
+          <!-- In Progress -->
+
+          <article class="metric-card">
+
+            <div class="metric-card-header">
+
+              <span class="metric-label">
+                In progress
+              </span>
+
+              <span
+                class="metric-icon"
+                aria-hidden="true"
+              >
+                <svg viewBox="0 0 24 24" focusable="false">
+                  <path d="M4 12h16"></path>
+                  <path d="M13 5l7 7-7 7"></path>
+                </svg>
+              </span>
+
+            </div>
+
+            <strong class="metric-value">
+              {{ dashboard.tickets.inProgress }}
+            </strong>
+
+            <span class="metric-caption">
+              Currently being handled
+            </span>
+
+          </article>
+
+
+          <!-- Resolved -->
+
+          <article class="metric-card">
+
+            <div class="metric-card-header">
+
+              <span class="metric-label">
+                Resolved
+              </span>
+
+              <span
+                class="metric-icon"
+                aria-hidden="true"
+              >
+                <svg viewBox="0 0 24 24" focusable="false">
+                  <circle cx="12" cy="12" r="8"></circle>
+                  <path d="M8.5 12l2.3 2.3 4.7-5"></path>
+                </svg>
+              </span>
+
+            </div>
+
+            <strong class="metric-value">
+              {{ dashboard.tickets.resolved }}
+            </strong>
+
+            <span class="metric-caption">
+              Awaiting closure
+            </span>
+
+          </article>
+
+
+          <!-- Closed -->
+
+          <article class="metric-card">
+
+            <div class="metric-card-header">
+
+              <span class="metric-label">
+                Closed
+              </span>
+
+              <span
+                class="metric-icon"
+                aria-hidden="true"
+              >
+                <svg viewBox="0 0 24 24" focusable="false">
+                  <path d="M5 5h14v14H5z"></path>
+                  <path d="M8.5 12l2.2 2.2 4.8-5"></path>
+                </svg>
+              </span>
+
+            </div>
+
+            <strong class="metric-value">
+              {{ dashboard.tickets.closed }}
+            </strong>
+
+            <span class="metric-caption">
+              Completed requests
+            </span>
+
+          </article>
+
+
+          <!-- Reopened -->
+
+          <article class="metric-card">
+
+            <div class="metric-card-header">
+
+              <span class="metric-label">
+                Reopened
+              </span>
+
+              <span
+                class="metric-icon"
+                aria-hidden="true"
+              >
+                <svg viewBox="0 0 24 24" focusable="false">
+                  <path d="M5 8a8 8 0 0 1 13.5-1"></path>
+                  <path d="M19 5v4h-4"></path>
+                  <path d="M19 16a8 8 0 0 1-13.5 1"></path>
+                  <path d="M5 19v-4h4"></path>
+                </svg>
+              </span>
+
+            </div>
+
+            <strong class="metric-value">
+              {{ dashboard.tickets.reopened }}
+            </strong>
+
+            <span class="metric-caption">
+              Returned to support
+            </span>
+
+          </article>
+
+        </div>
+
+      </section>
+
+
+      <!-- =====================================================
+           Users Overview
+           ===================================================== -->
+
+      <section
+        class="section-block"
+        aria-labelledby="users-overview-title"
+      >
+
+        <div class="section-heading">
+
+          <div>
+
+            <span class="eyebrow">
+              USER DIRECTORY
+            </span>
+
+            <h2 id="users-overview-title">
+              Users overview
+            </h2>
+
+            <p>
+              Current user distribution across system roles.
+            </p>
+
+          </div>
+
+          <button
+            type="button"
+            class="text-button"
+            (click)="goToAdminUsers()"
+          >
+            Manage users
+            <span aria-hidden="true">→</span>
+          </button>
+
+        </div>
+
+
+        <div class="user-summary-grid">
+
+
+          <article class="summary-card summary-card-primary">
+
+            <span class="summary-label">
+              Total users
+            </span>
+
+            <strong>
+              {{ dashboard.users.total }}
+            </strong>
+
+            <span class="summary-meta">
+              Registered accounts
+            </span>
+
+          </article>
+
+
+          <article class="summary-card">
+
+            <span class="summary-label">
+              Active users
+            </span>
+
+            <strong>
+              {{ dashboard.users.active }}
+            </strong>
+
+            <span class="summary-meta">
+              Currently enabled
+            </span>
+
+          </article>
+
+
+          <article class="summary-card">
+
+            <span class="summary-label">
+              Employees
+            </span>
+
+            <strong>
+              {{ dashboard.users.employees }}
+            </strong>
+
+            <span class="summary-meta">
+              Service requesters
+            </span>
+
+          </article>
+
+
+          <article class="summary-card">
+
+            <span class="summary-label">
+              IT agents
+            </span>
+
+            <strong>
+              {{ dashboard.users.itAgents }}
+            </strong>
+
+            <span class="summary-meta">
+              Support personnel
+            </span>
+
+          </article>
+
+
+          <article class="summary-card">
+
+            <span class="summary-label">
+              Administrators
+            </span>
+
+            <strong>
+              {{ dashboard.users.admins }}
+            </strong>
+
+            <span class="summary-meta">
+              System management
+            </span>
+
+          </article>
+
+
+        </div>
+
+      </section>
+
+
+      <!-- =====================================================
+           Analytics
+           ===================================================== -->
+
+      <section
+        class="analytics-grid"
+        aria-label="Ticket analytics"
+      >
+
+
+        <!-- Priority -->
+
+        <article class="data-panel">
+
+          <div class="panel-heading">
+
+            <div>
+
+              <span class="eyebrow">
+                TICKET ANALYTICS
+              </span>
+
+              <h2>
+                Tickets by priority
+              </h2>
+
+              <p>
+                Distribution of support requests by urgency.
+              </p>
+
+            </div>
+
+            <button
+              type="button"
+              class="panel-action"
+              (click)="goToAdminTickets()"
+            >
+              View tickets
+            </button>
+
+          </div>
+
+
+          <div
+            *ngIf="dashboard.ticketsByPriority.length > 0"
+            class="breakdown-list"
+          >
+
+            <div
+              class="breakdown-row"
+              *ngFor="let item of dashboard.ticketsByPriority"
+            >
+
+              <div class="breakdown-info">
+
+                <span>
+                  {{ item.name }}
+                </span>
+
+                <strong>
+                  {{ item.count }}
+                </strong>
+
+              </div>
+
+              <div class="breakdown-track">
+
+                <span
+                  class="breakdown-fill"
+                  [style.width.%]="
+                    dashboard.tickets.total > 0
+                      ? (item.count / dashboard.tickets.total) * 100
+                      : 0
+                  "
+                ></span>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div
+            *ngIf="dashboard.ticketsByPriority.length === 0"
+            class="empty-state"
+          >
+            <strong>
+              No priority data
+            </strong>
+
+            <span>
+              Priority statistics will appear here.
+            </span>
+          </div>
+
+        </article>
+
+
+        <!-- Category -->
+
+        <article class="data-panel">
+
+          <div class="panel-heading">
+
+            <div>
+
+              <span class="eyebrow">
+                TICKET ANALYTICS
+              </span>
+
+              <h2>
+                Tickets by category
+              </h2>
+
+              <p>
+                Distribution of support requests by category.
+              </p>
+
+            </div>
+
+            <button
+              type="button"
+              class="panel-action"
+              (click)="goToAdminCategories()"
+            >
+              Categories
+            </button>
+
+          </div>
+
+
+          <div
+            *ngIf="dashboard.ticketsByCategory.length > 0"
+            class="breakdown-list"
+          >
+
+            <div
+              class="breakdown-row"
+              *ngFor="let item of dashboard.ticketsByCategory"
+            >
+
+              <div class="breakdown-info">
+
+                <span>
+                  {{ item.name }}
+                </span>
+
+                <strong>
+                  {{ item.count }}
+                </strong>
+
+              </div>
+
+              <div class="breakdown-track">
+
+                <span
+                  class="breakdown-fill"
+                  [style.width.%]="
+                    dashboard.tickets.total > 0
+                      ? (item.count / dashboard.tickets.total) * 100
+                      : 0
+                  "
+                ></span>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div
+            *ngIf="dashboard.ticketsByCategory.length === 0"
+            class="empty-state"
+          >
+
+            <strong>
+              No category data
+            </strong>
+
+            <span>
+              Category statistics will appear here.
+            </span>
+
+          </div>
+
+        </article>
+
+      </section>
+
+
+      <!-- =====================================================
+           Recent Tickets
+           ===================================================== -->
+
+      <section class="data-panel large-panel">
+
+        <div class="panel-heading">
+
+          <div>
+
+            <span class="eyebrow">
+              LIVE QUEUE
+            </span>
+
+            <h2>
+              Recent tickets
+            </h2>
+
+            <p>
+              The latest support requests created in the system.
+            </p>
+
+          </div>
+
+          <button
+            type="button"
+            class="panel-action"
+            (click)="goToAdminTickets()"
+          >
+            View all tickets
+          </button>
+
+        </div>
+
+
+        <div
+          *ngIf="dashboard.recentTickets.length > 0"
+          class="tickets-table-wrapper"
+        >
+
+          <table class="tickets-table">
+
+            <thead>
+
+              <tr>
+                <th scope="col">Ticket</th>
+                <th scope="col">Requester</th>
+                <th scope="col">Category</th>
+                <th scope="col">Priority</th>
+                <th scope="col">Status</th>
+                <th scope="col">Created</th>
+              </tr>
+
+            </thead>
+
+
+            <tbody>
+
+              <tr
+                *ngFor="let ticket of dashboard.recentTickets"
+              >
+
+                <td>
+
+                  <div class="ticket-title">
+
+                    <strong>
+                      #{{ ticket.id }}
+                    </strong>
+
+                    <span>
+                      {{ ticket.title }}
+                    </span>
+
+                  </div>
+
+                </td>
+
+
+                <td>
+                  {{ ticket.createdBy }}
+                </td>
+
+
+                <td>
+                  {{ ticket.category }}
+                </td>
+
+
+                <td>
+
+                  <span
+                    class="table-badge priority-badge"
+                    [class.priority-high]="ticket.priority === 'High'"
+                    [class.priority-medium]="ticket.priority === 'Medium'"
+                    [class.priority-low]="ticket.priority === 'Low'"
+                    [class.priority-critical]="ticket.priority === 'Critical'"
+                  >
+                    {{ ticket.priority }}
+                  </span>
+
+                </td>
+
+
+                <td>
+
+                  <span
+                    class="table-badge status-badge"
+                    [class.status-open]="ticket.status === 'Open'"
+                    [class.status-progress]="ticket.status === 'In Progress'"
+                    [class.status-resolved]="ticket.status === 'Resolved'"
+                    [class.status-closed]="ticket.status === 'Closed'"
+                    [class.status-reopened]="ticket.status === 'Reopened'"
+                  >
+                    {{ ticket.status }}
+                  </span>
+
+                </td>
+
+
+                <td>
+
+                  <span class="table-date">
+                    {{ ticket.createdAt }}
+                  </span>
+
+                </td>
+
+              </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+
+        <div
+          *ngIf="dashboard.recentTickets.length === 0"
+          class="empty-state"
+        >
+
+          <strong>
+            No tickets yet
+          </strong>
+
+          <span>
+            New support requests will appear here.
+          </span>
+
+        </div>
+
+      </section>
+
+
+      <!-- =====================================================
+           Recent Activity
+           ===================================================== -->
+
+      <section class="data-panel large-panel">
+
+        <div class="panel-heading">
+
+          <div>
+
+            <span class="eyebrow">
+              SYSTEM ACTIVITY
+            </span>
+
+            <h2>
+              Recent activity
+            </h2>
+
+            <p>
+              Latest ticket events recorded by the system.
+            </p>
+
+          </div>
+
+          <button
+            type="button"
+            class="panel-action"
+            (click)="goToAdminTicketHistory()"
+          >
+            View history
+          </button>
+
+        </div>
+
+
+        <div
+          *ngIf="dashboard.recentActivity.length > 0"
+          class="activity-list"
+        >
+
+          <article
+            class="activity-item"
+            *ngFor="let activity of dashboard.recentActivity"
+          >
+
+            <div
+              class="activity-marker"
+              aria-hidden="true"
+            >
+              <span></span>
+            </div>
+
+
+            <div class="activity-content">
+
+              <div class="activity-main">
+
+                <div class="activity-description">
+
+                  <strong>
+                    {{ activity.action }}
+                  </strong>
+
+                  <span>
+                    Ticket #{{ activity.ticketId }}
+                  </span>
+
+                </div>
+
+                <span class="activity-user">
+                  {{ activity.performedBy }}
+                </span>
+
+              </div>
+
+
+              <div
+                *ngIf="activity.oldValue || activity.newValue"
+                class="activity-transition"
+              >
+
+                <span *ngIf="activity.oldValue">
+                  {{ activity.oldValue }}
+                </span>
+
+                <span
+                  *ngIf="activity.oldValue && activity.newValue"
+                  aria-hidden="true"
+                >
+                  →
+                </span>
+
+                <strong *ngIf="activity.newValue">
+                  {{ activity.newValue }}
+                </strong>
+
+              </div>
+
+
+              <span class="activity-date">
+                {{ activity.createdAt }}
+              </span>
+
+            </div>
+
+          </article>
+
+        </div>
+
+
+        <div
+          *ngIf="dashboard.recentActivity.length === 0"
+          class="empty-state"
+        >
+
+          <strong>
+            No recent activity
+          </strong>
+
+          <span>
+            Ticket activity will appear here as the system is used.
+          </span>
+
+        </div>
+
+      </section>
+
+
+      <!-- =====================================================
+           Quick Actions
+           ===================================================== -->
+
+      <section class="section-block quick-actions-section">
+
+        <div class="section-heading">
+
+          <div>
+
+            <span class="eyebrow">
+              ADMINISTRATION
+            </span>
+
+            <h2>
+              Quick actions
+            </h2>
+
+            <p>
+              Jump directly to the areas you manage most often.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="quick-actions-grid">
+
+
+          <!-- Users -->
+
+          <button
+            type="button"
+            class="quick-action"
+            (click)="goToAdminUsers()"
+          >
+
+            <span
+              class="quick-action-icon"
+              aria-hidden="true"
+            >
+              <svg viewBox="0 0 24 24" focusable="false">
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M2 21v-2a4 4 0 0 1 4-4h6a4 4 0 0 1 4 4v2"></path>
+                <path d="M16 3.5a4 4 0 0 1 0 7"></path>
+                <path d="M18 15h1a3 3 0 0 1 3 3v3"></path>
+              </svg>
+            </span>
+
+            <span class="quick-action-content">
+
+              <strong>
+                Users
+              </strong>
+
+              <small>
+                Manage accounts and roles
+              </small>
+
+            </span>
+
+            <span
+              class="quick-action-arrow"
+              aria-hidden="true"
+            >
+              →
+            </span>
+
+          </button>
+
+
+          <!-- Tickets -->
+
+          <button
+            type="button"
+            class="quick-action"
+            (click)="goToAdminTickets()"
+          >
+
+            <span
+              class="quick-action-icon"
+              aria-hidden="true"
+            >
+              <svg viewBox="0 0 24 24" focusable="false">
+                <path d="M4 5h16v14H4z"></path>
+                <path d="M8 9h8"></path>
+                <path d="M8 13h5"></path>
+              </svg>
+            </span>
+
+            <span class="quick-action-content">
+
+              <strong>
+                Tickets
+              </strong>
+
+              <small>
+                Review and manage requests
+              </small>
+
+            </span>
+
+            <span
+              class="quick-action-arrow"
+              aria-hidden="true"
+            >
+              →
+            </span>
+
+          </button>
+
+
+          <!-- Categories -->
+
+          <button
+            type="button"
+            class="quick-action"
+            (click)="goToAdminCategories()"
+          >
+
+            <span
+              class="quick-action-icon"
+              aria-hidden="true"
+            >
+              <svg viewBox="0 0 24 24" focusable="false">
+                <path d="M4 5h16v14H4z"></path>
+                <path d="M8 9h8"></path>
+                <path d="M8 13h5"></path>
+              </svg>
+            </span>
+
+            <span class="quick-action-content">
+
+              <strong>
+                Categories
+              </strong>
+
+              <small>
+                Configure ticket classification
+              </small>
+
+            </span>
+
+            <span
+              class="quick-action-arrow"
+              aria-hidden="true"
+            >
+              →
+            </span>
+
+          </button>
+
+
+          <!-- Priorities -->
+
+          <button
+            type="button"
+            class="quick-action"
+            (click)="goToAdminPriorities()"
+          >
+
+            <span
+              class="quick-action-icon"
+              aria-hidden="true"
+            >
+              <svg viewBox="0 0 24 24" focusable="false">
+                <path d="M13 2L4 14h6l-1 8 9-12h-6z"></path>
+              </svg>
+            </span>
+
+            <span class="quick-action-content">
+
+              <strong>
+                Priorities
+              </strong>
+
+              <small>
+                Configure ticket urgency levels
+              </small>
+
+            </span>
+
+            <span
+              class="quick-action-arrow"
+              aria-hidden="true"
+            >
+              →
+            </span>
+
+          </button>
+
+
+          <!-- Departments -->
+
+          <button
+            type="button"
+            class="quick-action"
+            (click)="goToAdminDepartments()"
+          >
+
+            <span
+              class="quick-action-icon"
+              aria-hidden="true"
+            >
+              <svg viewBox="0 0 24 24" focusable="false">
+                <rect x="3" y="4" width="18" height="16"></rect>
+                <path d="M8 4v16"></path>
+                <path d="M8 9h13"></path>
+              </svg>
+            </span>
+
+            <span class="quick-action-content">
+
+              <strong>
+                Departments
+              </strong>
+
+              <small>
+                Manage organizational structure
+              </small>
+
+            </span>
+
+            <span
+              class="quick-action-arrow"
+              aria-hidden="true"
+            >
+              →
+            </span>
+
+          </button>
+
+
+          <!-- History -->
+
+          <button
+            type="button"
+            class="quick-action"
+            (click)="goToAdminTicketHistory()"
+          >
+
+            <span
+              class="quick-action-icon"
+              aria-hidden="true"
+            >
+              <svg viewBox="0 0 24 24" focusable="false">
+                <path d="M6 3h12v18H6z"></path>
+                <path d="M9 7h6"></path>
+                <path d="M9 11h6"></path>
+                <path d="M9 15h4"></path>
+              </svg>
+            </span>
+
+            <span class="quick-action-content">
+
+              <strong>
+                Ticket history
+              </strong>
+
+              <small>
+                Review system activity
+              </small>
+
+            </span>
+
+            <span
+              class="quick-action-arrow"
+              aria-hidden="true"
+            >
+              →
+            </span>
+
+          </button>
+
+
+        </div>
+
+      </section>
+
+
+    </ng-container>
+
+  </main>
+
+</div>

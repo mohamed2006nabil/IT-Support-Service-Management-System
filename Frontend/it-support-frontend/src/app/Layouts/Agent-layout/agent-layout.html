@@ -1,0 +1,169 @@
+<div class="agent-shell">
+  <aside class="agent-sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-mark">IT</div>
+      <div class="brand-copy">
+        <strong>IT Support</strong>
+        <span>Service Management</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav" aria-label="IT Agent navigation">
+      <span class="nav-section-label">WORKSPACE</span>
+
+      <button type="button" class="nav-item" [class.active]="isRouteActive('/agent-dashboard')" (click)="goToDashboard()">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="4" y="4" width="6" height="6" rx="1"></rect>
+          <rect x="14" y="4" width="6" height="6" rx="1"></rect>
+          <rect x="4" y="14" width="6" height="6" rx="1"></rect>
+          <rect x="14" y="14" width="6" height="6" rx="1"></rect>
+        </svg>
+        <span>Dashboard</span>
+      </button>
+
+      <button type="button" class="nav-item" [class.active]="isRouteActive('/agent-tickets')" (click)="goToAgentTickets()">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="4" y="5" width="16" height="14" rx="2"></rect>
+          <path d="M8 9h8M8 13h5"></path>
+        </svg>
+        <span>Assigned Tickets</span>
+      </button>
+
+      <button type="button" class="nav-item" [class.active]="isRouteActive('/agent-notifications')" (click)="goToAgentNotifications()">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path>
+          <path d="M10 21h4"></path>
+        </svg>
+        <span>Notifications</span>
+      </button>
+
+      <button type="button" class="nav-item" [class.active]="isRouteActive('/agent-ticket-history')" (click)="goToAgentTicketHistory()">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="5" y="4" width="14" height="16" rx="2"></rect>
+          <path d="M8 8h8M8 12h8M8 16h5"></path>
+        </svg>
+        <span>Ticket History</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <div class="sidebar-divider"></div>
+
+      <div class="sidebar-user" role="button" tabindex="0" (click)="goToAgentProfile()" (keydown.enter)="goToAgentProfile()" (keydown.space)="goToAgentProfile()">
+        <span class="sidebar-avatar">
+          <img
+            *ngIf="getProfileImageUrl()"
+            [src]="getProfileImageUrl()!"
+            [alt]="user?.fullName || 'IT Agent'"
+            (error)="handleProfileImageError()"
+          />
+          <span *ngIf="!getProfileImageUrl()">{{ userInitial() }}</span>
+        </span>
+
+        <span class="sidebar-user-copy">
+          <strong>{{ user?.fullName || 'IT Agent' }}</strong>
+          <small>{{ user?.role || 'IT Agent' }}</small>
+        </span>
+      </div>
+
+      <button type="button" class="logout-link" (click)="logout()">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M10 17l5-5-5-5"></path>
+          <path d="M15 12H3"></path>
+          <path d="M21 4v16"></path>
+        </svg>
+        <span>Logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <div class="agent-main">
+    <header class="top-navbar">
+      <div class="topbar-context">
+        <span class="topbar-label">IT AGENT WORKSPACE</span>
+        <strong>Support Operations</strong>
+      </div>
+
+      <div class="topbar-actions">
+        <div class="system-status">
+          <span class="status-dot" aria-hidden="true"></span>
+          <span>System operational</span>
+        </div>
+
+        <div class="topbar-divider" aria-hidden="true"></div>
+
+        <button
+          type="button"
+          class="topbar-profile"
+          (click)="toggleProfileMenu()"
+          [attr.aria-expanded]="isProfileMenuOpen"
+          aria-haspopup="menu"
+        >
+          <span class="topbar-avatar">
+            <img
+              *ngIf="getProfileImageUrl()"
+              [src]="getProfileImageUrl()!"
+              [alt]="user?.fullName || 'IT Agent'"
+              (error)="handleProfileImageError()"
+            />
+            <span *ngIf="!getProfileImageUrl()">{{ userInitial() }}</span>
+          </span>
+
+          <span class="topbar-user-copy">
+            <strong>{{ user?.fullName || 'IT Agent' }}</strong>
+            <small>{{ user?.role || 'IT Agent' }}</small>
+          </span>
+
+          <svg class="topbar-chevron" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m8 10 4 4 4-4"></path>
+          </svg>
+        </button>
+
+        <div *ngIf="isProfileMenuOpen" class="topbar-profile-menu" role="menu">
+          <div class="profile-menu-heading">
+            <strong>{{ user?.fullName || 'IT Agent' }}</strong>
+            <span>{{ user?.role || 'IT Agent' }}</span>
+          </div>
+
+          <div class="profile-menu-divider"></div>
+
+          <button
+            type="button"
+            class="profile-menu-item"
+            role="menuitem"
+            (click)="goToAgentProfile()"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="8" r="4"></circle>
+              <path d="M4 21a8 8 0 0 1 16 0"></path>
+            </svg>
+            <span>My Profile</span>
+          </button>
+
+          <button
+            type="button"
+            class="profile-menu-item danger"
+            role="menuitem"
+            (click)="logout()"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M10 17l5-5-5-5"></path>
+              <path d="M15 12H3"></path>
+              <path d="M21 4v16"></path>
+            </svg>
+            <span>Logout</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="agent-route-content">
+      <router-outlet></router-outlet>
+    </div>
+
+    <footer class="agent-footer">
+      <span>IT Support &amp; Service Management System</span>
+      <span>IT Agent Workspace</span>
+    </footer>
+  </div>
+</div>

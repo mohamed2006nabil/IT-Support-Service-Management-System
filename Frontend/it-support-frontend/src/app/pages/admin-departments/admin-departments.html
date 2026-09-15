@@ -1,0 +1,765 @@
+<div class="admin-departments-page">
+
+  <header class="page-header">
+    <div class="page-header-main">
+      <div class="header-copy">
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+          <button type="button" class="breadcrumb-link" (click)="goBack()">Home</button>
+          <span class="breadcrumb-separator" aria-hidden="true">/</span>
+          <span class="breadcrumb-current">Departments</span>
+        </nav>
+
+        <span class="eyebrow">ADMINISTRATION</span>
+        <h1>Departments Management</h1>
+        <p>Manage departments within the IT support system.</p>
+      </div>
+
+      <div class="header-actions">
+        <div class="system-status">
+          <span class="system-status-dot" aria-hidden="true"></span>
+          <div>
+            <strong>System operational</strong>
+            <span>All services running</span>
+          </div>
+        </div>
+
+        <div class="header-divider" aria-hidden="true"></div>
+
+        <div class="header-updated">
+          <span class="updated-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="8.5"></circle>
+              <path d="M12 7v5l3 2"></path>
+            </svg>
+          </span>
+          <div>
+            <span>Last updated</span>
+            <strong>{{ formatLastUpdated(lastUpdated()) }}</strong>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="refresh-btn"
+          (click)="refreshDepartments()"
+          [disabled]="loading()"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M20 11a8 8 0 0 0-14.9-4"></path>
+            <path d="M5 3v4h4"></path>
+            <path d="M4 13a8 8 0 0 0 14.9 4"></path>
+            <path d="M19 21v-4h-4"></path>
+          </svg>
+          Refresh
+        </button>
+
+        <div class="profile-menu">
+          <button
+            type="button"
+            class="profile-trigger"
+            aria-haspopup="menu"
+            [attr.aria-expanded]="isProfileMenuOpen"
+            [attr.aria-label]="'Open profile menu for ' + adminUser().fullName"
+            (click)="toggleProfileMenu()"
+          >
+            <span class="profile-avatar">
+              <img
+                *ngIf="getProfileImageUrl()"
+                [src]="getProfileImageUrl()!"
+                [alt]="adminUser().fullName"
+                (error)="handleProfileImageError()"
+              />
+              <span *ngIf="!getProfileImageUrl()" aria-hidden="true">
+                {{ adminUser().fullName.charAt(0).toUpperCase() }}
+              </span>
+            </span>
+
+            <span class="profile-trigger-copy">
+              <strong>{{ adminUser().fullName }}</strong>
+              <small>{{ adminUser().role }}</small>
+            </span>
+
+            <svg class="profile-chevron" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="m7 10 5 5 5-5"></path>
+            </svg>
+          </button>
+
+          <div *ngIf="isProfileMenuOpen" class="profile-dropdown" role="menu">
+            <div class="profile-dropdown-header">
+              <strong>{{ adminUser().fullName }}</strong>
+              <span>{{ adminUser().role }}</span>
+            </div>
+
+            <div class="profile-dropdown-divider"></div>
+
+            <button
+              type="button"
+              class="profile-menu-item"
+              role="menuitem"
+              (click)="goToAdminProfile()"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="8" r="4"></circle>
+                <path d="M4 21a8 8 0 0 1 16 0"></path>
+              </svg>
+              <span>View profile</span>
+            </button>
+
+            <button
+              type="button"
+              class="profile-menu-item profile-menu-item-danger"
+              role="menuitem"
+              (click)="logout()"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M10 17l5-5-5-5"></path>
+                <path d="M15 12H3"></path>
+                <path d="M21 4v16"></path>
+              </svg>
+              <span>Logout</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section class="department-stats" aria-label="Department statistics">
+    <div class="stat-card">
+      <div class="stat-icon stat-icon-total" aria-hidden="true">
+        <svg viewBox="0 0 24 24">
+          <path d="M4 20V7l8-4 8 4v13H4Z"></path>
+          <path d="M8 20v-5h8v5M8 9h.01M12 9h.01M16 9h.01"></path>
+        </svg>
+      </div>
+      <div>
+        <span>Total Departments</span>
+        <strong>{{ departments().length }}</strong>
+        <small>Configured departments</small>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon stat-icon-active" aria-hidden="true">
+        <svg viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="8.5"></circle>
+          <path d="m8 12 2.5 2.5L16 9"></path>
+        </svg>
+      </div>
+      <div>
+        <span>Visible</span>
+        <strong>{{ filteredDepartments().length }}</strong>
+        <small>Current search results</small>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon stat-icon-coverage" aria-hidden="true">
+        <svg viewBox="0 0 24 24">
+          <circle cx="9" cy="8" r="3"></circle>
+          <path d="M3 20a6 6 0 0 1 12 0M16 5.5a3 3 0 0 1 0 5.8M17 14a5 5 0 0 1 4 6"></path>
+        </svg>
+      </div>
+      <div>
+        <span>Directory</span>
+        <strong>{{ departmentCoveragePercent() }}%</strong>
+        <small>Directory visibility</small>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon stat-icon-standard" aria-hidden="true">
+        <svg viewBox="0 0 24 24">
+          <path d="M5 5h14v14H5z"></path>
+          <path d="M8 9h8M8 12h8M8 15h5"></path>
+        </svg>
+      </div>
+      <div>
+        <span>Page</span>
+        <strong>{{ currentPage() }} / {{ totalPages() }}</strong>
+        <small>{{ pageSize }} departments per page</small>
+      </div>
+    </div>
+  </section>
+
+  <section class="directory-card">
+    <div class="directory-header">
+      <div>
+        <span class="section-eyebrow">DIRECTORY</span>
+        <h2>System Departments</h2>
+        <p>{{ filteredDepartments().length }} of {{ departments().length }} departments</p>
+      </div>
+
+      <button
+        type="button"
+        class="add-btn"
+        (click)="openAddModal()"
+      >
+        <span aria-hidden="true">+</span>
+        Add Department
+      </button>
+    </div>
+
+    <div class="directory-toolbar">
+      <label class="search-box" aria-label="Search departments">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="11" cy="11" r="6.5"></circle>
+          <path d="m16 16 4 4"></path>
+        </svg>
+
+        <input
+          type="text"
+          placeholder="Search departments..."
+          [ngModel]="searchTerm()"
+          (ngModelChange)="onSearchChange($event)"
+        />
+
+        <button
+          *ngIf="searchTerm()"
+          type="button"
+          class="clear-search"
+          (click)="clearSearch()"
+          aria-label="Clear search"
+        >
+          ×
+        </button>
+      </label>
+
+      <button
+        *ngIf="searchTerm()"
+        type="button"
+        class="reset-btn"
+        (click)="clearSearch()"
+      >
+        Reset
+      </button>
+    </div>
+
+    <div *ngIf="loading()" class="loading-state">
+      <div class="spinner" aria-hidden="true"></div>
+      <p>Loading departments...</p>
+    </div>
+
+    <div *ngIf="!loading()" class="departments-table-wrapper">
+      <table class="departments-table">
+        <thead>
+          <tr>
+            <th class="id-cell">#</th>
+            <th>DEPARTMENT</th>
+            <th class="actions-cell">ACTIONS</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let department of pagedDepartments()">
+            <td class="id-cell">#{{ department.id }}</td>
+
+            <td>
+              <div class="department-name">
+                <span class="department-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M4 20V7l8-4 8 4v13H4Z"></path>
+                    <path d="M8 20v-5h8v5M8 9h.01M12 9h.01M16 9h.01"></path>
+                  </svg>
+                </span>
+                <strong>{{ department.name }}</strong>
+              </div>
+            </td>
+
+            <td class="actions-cell">
+              <div class="action-buttons">
+                <button
+                  type="button"
+                  class="action-btn view-btn"
+                  (click)="viewDepartment(department)"
+                  [attr.aria-label]="'View ' + department.name"
+                >
+                  View
+                </button>
+
+                <button
+                  type="button"
+                  class="action-btn edit-btn"
+                  (click)="openEditModal(department)"
+                  [attr.aria-label]="'Edit ' + department.name"
+                >
+                  Edit
+                </button>
+
+                <button
+                  type="button"
+                  class="action-btn delete-btn"
+                  (click)="openDeleteModal(department)"
+                  [attr.aria-label]="'Delete ' + department.name"
+                >
+                  Delete
+                </button>
+              </div>
+            </td>
+          </tr>
+
+          <tr *ngIf="filteredDepartments().length === 0">
+            <td colspan="3" class="empty-departments">
+              <div class="empty-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                  <circle cx="11" cy="11" r="6.5"></circle>
+                  <path d="m16 16 4 4"></path>
+                </svg>
+              </div>
+
+              <h3>
+                {{ departments().length > 0 ? 'No Matching Departments' : 'No Departments Found' }}
+              </h3>
+
+              <p>
+                {{ departments().length > 0
+                  ? 'Try a different search term.'
+                  : 'There are no departments to display.' }}
+              </p>
+
+              <button
+                *ngIf="departments().length > 0"
+                type="button"
+                class="empty-clear-btn"
+                (click)="clearSearch()"
+              >
+                Clear Search
+              </button>
+
+              <button
+                *ngIf="departments().length === 0"
+                type="button"
+                class="empty-add-btn"
+                (click)="openAddModal()"
+              >
+                + Add First Department
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div
+      *ngIf="!loading() && filteredDepartments().length > 0"
+      class="pagination"
+    >
+      <span>
+        Showing {{ pageStart() }} - {{ pageEnd() }} of {{ filteredDepartments().length }}
+      </span>
+
+      <div class="pagination-controls">
+        <button
+          type="button"
+          class="page-btn"
+          (click)="previousPage()"
+          [disabled]="currentPage() === 1"
+          aria-label="Previous page"
+        >
+          ‹
+        </button>
+
+        <button
+          *ngFor="let page of pageNumbers()"
+          type="button"
+          class="page-btn"
+          [class.active]="page === currentPage()"
+          (click)="goToPage(page)"
+        >
+          {{ page }}
+        </button>
+
+        <button
+          type="button"
+          class="page-btn"
+          (click)="nextPage()"
+          [disabled]="currentPage() === totalPages()"
+          aria-label="Next page"
+        >
+          ›
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Toast -->
+  <div
+    *ngIf="message()"
+    class="toast"
+    [class.toast-success]="messageType() === 'success'"
+    [class.toast-error]="messageType() === 'error'"
+  >
+
+    <span class="toast-icon">
+      {{
+        messageType() === 'success'
+          ? '✓'
+          : '!'
+      }}
+    </span>
+
+    <span>
+      {{ message() }}
+    </span>
+
+  </div>
+
+
+  <!-- View Modal -->
+  <div
+    *ngIf="showDetailsModal()"
+    class="modal-overlay"
+    (click)="closeDetails()"
+  >
+
+    <div
+      class="modal"
+      (click)="$event.stopPropagation()"
+    >
+
+      <div class="modal-header">
+
+        <div>
+
+          <span class="modal-label">
+            DEPARTMENT DETAILS
+          </span>
+
+          <h2>
+            {{ selectedDepartment()?.name }}
+          </h2>
+
+        </div>
+
+        <button
+          type="button"
+          class="modal-close"
+          (click)="closeDetails()"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <div class="modal-body">
+
+        <div class="detail-item">
+
+          <span class="detail-label">
+            Department ID
+          </span>
+
+          <strong>
+            #{{ selectedDepartment()?.id }}
+          </strong>
+
+        </div>
+
+
+        <div class="detail-item">
+
+          <span class="detail-label">
+            Department Name
+          </span>
+
+          <strong>
+            {{ selectedDepartment()?.name }}
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <div class="modal-footer">
+
+        <button
+          type="button"
+          class="secondary-btn"
+          (click)="closeDetails()"
+        >
+          Close
+        </button>
+
+        <button
+          type="button"
+          class="primary-btn"
+          (click)="openEditModal(selectedDepartment()!)"
+        >
+          Edit Department
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- Add Modal -->
+  <div
+    *ngIf="showAddModal()"
+    class="modal-overlay"
+    (click)="closeAddModal()"
+  >
+
+    <div
+      class="modal"
+      (click)="$event.stopPropagation()"
+    >
+
+      <div class="modal-header">
+
+        <div>
+
+          <span class="modal-label">
+            CREATE DEPARTMENT
+          </span>
+
+          <h2>
+            Add New Department
+          </h2>
+
+        </div>
+
+        <button
+          type="button"
+          class="modal-close"
+          (click)="closeAddModal()"
+          [disabled]="saving()"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <div class="modal-body">
+
+        <div class="form-group">
+
+          <label>
+            Department Name
+            <span>*</span>
+          </label>
+
+          <input
+            type="text"
+            [(ngModel)]="newDepartment.name"
+            placeholder="Enter department name"
+            maxlength="100"
+          />
+
+        </div>
+
+      </div>
+
+
+      <div class="modal-footer">
+
+        <button
+          type="button"
+          class="secondary-btn"
+          (click)="closeAddModal()"
+          [disabled]="saving()"
+        >
+          Cancel
+        </button>
+
+        <button
+          type="button"
+          class="primary-btn"
+          (click)="createDepartment()"
+          [disabled]="saving()"
+        >
+
+          <span
+            *ngIf="saving()"
+            class="button-spinner"
+          ></span>
+
+          {{
+            saving()
+              ? 'Creating...'
+              : 'Create Department'
+          }}
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- Edit Modal -->
+  <div
+    *ngIf="showEditModal()"
+    class="modal-overlay"
+    (click)="closeEditModal()"
+  >
+
+    <div
+      class="modal"
+      (click)="$event.stopPropagation()"
+    >
+
+      <div class="modal-header">
+
+        <div>
+
+          <span class="modal-label">
+            EDIT DEPARTMENT
+          </span>
+
+          <h2>
+            Update Department
+          </h2>
+
+        </div>
+
+        <button
+          type="button"
+          class="modal-close"
+          (click)="closeEditModal()"
+          [disabled]="saving()"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <div class="modal-body">
+
+        <div class="form-group">
+
+          <label>
+            Department Name
+            <span>*</span>
+          </label>
+
+          <input
+            type="text"
+            [(ngModel)]="editDepartment.name"
+            placeholder="Enter department name"
+            maxlength="100"
+          />
+
+        </div>
+
+      </div>
+
+
+      <div class="modal-footer">
+
+        <button
+          type="button"
+          class="secondary-btn"
+          (click)="closeEditModal()"
+          [disabled]="saving()"
+        >
+          Cancel
+        </button>
+
+        <button
+          type="button"
+          class="primary-btn"
+          (click)="updateDepartment()"
+          [disabled]="saving()"
+        >
+
+          <span
+            *ngIf="saving()"
+            class="button-spinner"
+          ></span>
+
+          {{
+            saving()
+              ? 'Saving...'
+              : 'Save Changes'
+          }}
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- Delete Modal -->
+  <div
+    *ngIf="showDeleteModal()"
+    class="modal-overlay"
+    (click)="closeDeleteModal()"
+  >
+
+    <div
+      class="modal delete-modal"
+      (click)="$event.stopPropagation()"
+    >
+
+      <div class="delete-icon">
+        ⚠
+      </div>
+
+      <h2>
+        Delete Department?
+      </h2>
+
+      <p>
+        Are you sure you want to delete
+        <strong>
+          {{ departmentToDelete()?.name }}
+        </strong>
+        ?
+      </p>
+
+      <p class="delete-warning">
+        If this department is already assigned to users,
+        the system will prevent the deletion.
+      </p>
+
+
+      <div class="modal-footer">
+
+        <button
+          type="button"
+          class="secondary-btn"
+          (click)="closeDeleteModal()"
+          [disabled]="deleting()"
+        >
+          Cancel
+        </button>
+
+        <button
+          type="button"
+          class="danger-btn"
+          (click)="confirmDelete()"
+          [disabled]="deleting()"
+        >
+
+          <span
+            *ngIf="deleting()"
+            class="button-spinner"
+          ></span>
+
+          {{
+            deleting()
+              ? 'Deleting...'
+              : 'Delete Department'
+          }}
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

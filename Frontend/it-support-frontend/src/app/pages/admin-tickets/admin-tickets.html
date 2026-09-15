@@ -1,0 +1,931 @@
+<div class="admin-tickets-page">
+
+  <header class="tickets-header">
+    <div class="header-main">
+      <div class="header-copy">
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+          <button
+            type="button"
+            class="breadcrumb-link"
+            (click)="goHome()"
+          >
+            Home
+          </button>
+          <span class="breadcrumb-separator" aria-hidden="true">/</span>
+          <span class="breadcrumb-current">Tickets</span>
+        </nav>
+
+        <span class="eyebrow">Administration</span>
+
+        <h1>Tickets Management</h1>
+
+        <p>Manage support tickets, assignments, priorities, and status.</p>
+      </div>
+
+      <div class="header-actions">
+        <div class="system-status">
+          <span class="system-status-dot" aria-hidden="true"></span>
+          <div>
+            <strong>System operational</strong>
+            <span>All services running</span>
+          </div>
+        </div>
+
+        <div class="header-updated">
+          <span class="updated-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="8.5"></circle>
+              <path d="M12 7v5l3 2"></path>
+            </svg>
+          </span>
+          <div>
+            <span>Last updated</span>
+            <strong>{{ lastUpdated() ? formatDate(lastUpdated()) : 'Not yet' }}</strong>
+          </div>
+        </div>
+
+        <div class="profile-menu">
+          <button
+            type="button"
+            class="profile-trigger"
+            aria-haspopup="menu"
+            [attr.aria-expanded]="isProfileMenuOpen"
+            [attr.aria-label]="'Open profile menu for ' + adminUser().fullName"
+            (click)="toggleProfileMenu()"
+          >
+            <span class="profile-avatar">
+              <img
+                *ngIf="getProfileImageUrl()"
+                [src]="getProfileImageUrl()!"
+                [alt]="adminUser().fullName"
+                (error)="handleProfileImageError()"
+              />
+              <span *ngIf="!getProfileImageUrl()" aria-hidden="true">
+                {{ adminUser().fullName.charAt(0).toUpperCase() }}
+              </span>
+            </span>
+
+            <span class="profile-trigger-copy">
+              <strong>{{ adminUser().fullName }}</strong>
+              <small>{{ adminUser().role }}</small>
+            </span>
+
+            <svg class="profile-chevron" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="m7 10 5 5 5-5"></path>
+            </svg>
+          </button>
+
+          <div *ngIf="isProfileMenuOpen" class="profile-dropdown" role="menu">
+            <div class="profile-dropdown-header">
+              <strong>{{ adminUser().fullName }}</strong>
+              <span>{{ adminUser().role }}</span>
+            </div>
+            <div class="profile-dropdown-divider"></div>
+
+            <button type="button" class="profile-menu-item" role="menuitem" (click)="goToAdminProfile()">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="8" r="4"></circle>
+                <path d="M4 21a8 8 0 0 1 16 0"></path>
+              </svg>
+              <span>View profile</span>
+            </button>
+
+            <button type="button" class="profile-menu-item profile-menu-item-danger" role="menuitem" (click)="logout()">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M10 17l5-5-5-5"></path>
+                <path d="M15 12H3"></path>
+                <path d="M21 4v16"></path>
+              </svg>
+              <span>Logout</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="tickets-content">
+
+    <section class="metrics-grid" aria-label="Ticket summary">
+      <article class="metric-card">
+        <div>
+          <span class="metric-label">Total Tickets</span>
+          <strong>{{ totalTickets() }}</strong>
+          <span class="metric-note">All support tickets</span>
+        </div>
+        <span class="metric-accent" aria-hidden="true"></span>
+      </article>
+
+      <article class="metric-card">
+        <div>
+          <span class="metric-label">Open</span>
+          <strong>{{ openTickets() }}</strong>
+          <span class="metric-note">Awaiting action</span>
+        </div>
+        <span class="metric-accent" aria-hidden="true"></span>
+      </article>
+
+      <article class="metric-card">
+        <div>
+          <span class="metric-label">In Progress</span>
+          <strong>{{ inProgressTickets() }}</strong>
+          <span class="metric-note">Being worked on</span>
+        </div>
+        <span class="metric-accent" aria-hidden="true"></span>
+      </article>
+
+      <article class="metric-card">
+        <div>
+          <span class="metric-label">Resolved</span>
+          <strong>{{ resolvedTickets() }}</strong>
+          <span class="metric-note">Resolution recorded</span>
+        </div>
+        <span class="metric-accent" aria-hidden="true"></span>
+      </article>
+
+      <article class="metric-card">
+        <div>
+          <span class="metric-label">Closed</span>
+          <strong>{{ closedTickets() }}</strong>
+          <span class="metric-note">Completed tickets</span>
+        </div>
+        <span class="metric-accent" aria-hidden="true"></span>
+      </article>
+
+      <article class="metric-card">
+        <div>
+          <span class="metric-label">Reopened</span>
+          <strong>{{ reopenedTickets() }}</strong>
+          <span class="metric-note">Needs follow-up</span>
+        </div>
+        <span class="metric-accent" aria-hidden="true"></span>
+      </article>
+    </section>
+
+    <section class="directory-layout">
+
+      <div class="directory-card">
+        <div class="directory-header">
+          <div>
+            <div class="section-label">Directory</div>
+            <h2>System Tickets</h2>
+            <p>Showing {{ filteredTickets().length }} of {{ tickets().length }} tickets</p>
+          </div>
+        </div>
+
+        <div class="filters-section">
+          <div class="search-box">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="11" cy="11" r="6.5"></circle>
+              <path d="m16 16 4.5 4.5"></path>
+            </svg>
+            <input
+              type="text"
+              placeholder="Search tickets, employees, or agents..."
+              [ngModel]="searchTerm()"
+              (ngModelChange)="searchTerm.set($event)"
+              aria-label="Search tickets"
+            />
+          </div>
+
+          <div class="filter-box">
+            <label for="ticket-status-filter">Status</label>
+            <select
+              id="ticket-status-filter"
+              [ngModel]="selectedStatusId()"
+              (ngModelChange)="selectedStatusId.set(+$event)"
+            >
+              <option [ngValue]="0">All Statuses</option>
+              <option *ngFor="let status of statuses()" [ngValue]="status.id">
+                {{ status.name }}
+              </option>
+            </select>
+          </div>
+
+          <div class="filter-box">
+            <label for="ticket-priority-filter">Priority</label>
+            <select
+              id="ticket-priority-filter"
+              [ngModel]="selectedPriorityId()"
+              (ngModelChange)="selectedPriorityId.set(+$event)"
+            >
+              <option [ngValue]="0">All Priorities</option>
+              <option *ngFor="let priority of priorities()" [ngValue]="priority.id">
+                {{ priority.name }}
+              </option>
+            </select>
+          </div>
+
+          <div class="filter-box">
+            <label for="ticket-category-filter">Category</label>
+            <select
+              id="ticket-category-filter"
+              [ngModel]="selectedCategoryId()"
+              (ngModelChange)="selectedCategoryId.set(+$event)"
+            >
+              <option [ngValue]="0">All Categories</option>
+              <option *ngFor="let category of categories()" [ngValue]="category.id">
+                {{ category.name }}
+              </option>
+            </select>
+          </div>
+
+          <div class="filter-box">
+            <label for="ticket-agent-filter">Assigned Agent</label>
+            <select
+              id="ticket-agent-filter"
+              [ngModel]="selectedAgentId()"
+              (ngModelChange)="selectedAgentId.set(+$event)"
+            >
+              <option [ngValue]="0">All Agents</option>
+              <option *ngFor="let agent of agents" [ngValue]="agent.id">
+                {{ agent.fullName }}
+              </option>
+            </select>
+          </div>
+
+          <button type="button" class="clear-filters-btn" (click)="clearFilters()">
+            Reset
+          </button>
+        </div>
+
+        <div class="tickets-table-wrapper">
+          <table class="tickets-table">
+            <colgroup>
+              <col class="col-id">
+              <col class="col-ticket">
+              <col class="col-person">
+              <col class="col-person">
+              <col class="col-category">
+              <col class="col-small">
+              <col class="col-small">
+              <col class="col-created">
+              <col class="col-actions">
+            </colgroup>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Ticket</th>
+                <th>Employee</th>
+                <th>Assigned To</th>
+                <th>Category</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr *ngIf="loading()">
+                <td colspan="9" class="table-state">
+                  <span class="loading-spinner" aria-hidden="true"></span>
+                  <span>Loading tickets...</span>
+                </td>
+              </tr>
+
+              <tr
+                *ngFor="let ticket of pagedTickets()"
+                [class.hidden-row]="loading()"
+              >
+                <td>
+                  <span class="ticket-id">#{{ ticket.id }}</span>
+                </td>
+
+                <td>
+                  <div class="ticket-cell">
+                    <strong>{{ ticket.title }}</strong>
+                    <span>{{ ticket.description }}</span>
+                  </div>
+                </td>
+
+                <td>
+                  <div class="person-cell">
+                    <span class="person-avatar">
+                      {{ ticket.userName.charAt(0).toUpperCase() }}
+                    </span>
+                    <span>{{ ticket.userName }}</span>
+                  </div>
+                </td>
+
+                <td>
+                  <div class="person-cell" *ngIf="ticket.assignedToName">
+                    <span class="person-avatar agent-avatar">
+                      {{ ticket.assignedToName.charAt(0).toUpperCase() }}
+                    </span>
+                    <span>{{ ticket.assignedToName }}</span>
+                  </div>
+                  <span class="unassigned-text" *ngIf="!ticket.assignedToName">
+                    Unassigned
+                  </span>
+                </td>
+
+                <td>
+                  <span class="category-text">{{ ticket.categoryName }}</span>
+                </td>
+
+                <td>
+                  <span
+                    class="priority-badge"
+                    [ngClass]="getPriorityClass(ticket.priorityName)"
+                  >
+                    {{ ticket.priorityName }}
+                  </span>
+                </td>
+
+                <td>
+                  <span
+                    class="status-badge"
+                    [ngClass]="getStatusClass(ticket.statusName)"
+                  >
+                    {{ ticket.statusName }}
+                  </span>
+                </td>
+
+                <td>
+                  <span class="date-text">{{ formatDate(ticket.createdAt) }}</span>
+                </td>
+
+                <td>
+                  <div class="actions">
+                    <button
+                      type="button"
+                      class="action-btn"
+                      title="View ticket"
+                      aria-label="View ticket"
+                      (click)="viewTicket(ticket)"
+                    >
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"></path>
+                        <circle cx="12" cy="12" r="2.5"></circle>
+                      </svg>
+                    </button>
+
+                    <button
+                      type="button"
+                      class="action-btn"
+                      title="Edit ticket"
+                      aria-label="Edit ticket"
+                      (click)="openEditTicket(ticket)"
+                    >
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M4 20h4L19 9l-4-4L4 16v4Z"></path>
+                        <path d="m13.5 6.5 4 4"></path>
+                      </svg>
+                    </button>
+
+                    <button
+                      type="button"
+                      class="action-btn action-danger"
+                      title="Delete ticket"
+                      aria-label="Delete ticket"
+                      (click)="openDeleteModal(ticket)"
+                    >
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M5 7h14"></path>
+                        <path d="M9 7V4h6v3"></path>
+                        <path d="m8 7 .7 13h6.6L16 7"></path>
+                        <path d="M10 10v7M14 10v7"></path>
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+
+              <tr *ngIf="!loading() && filteredTickets().length === 0">
+                <td colspan="9" class="table-state empty-state">
+                  <div class="empty-state-title">No tickets found</div>
+                  <p>No tickets match the current search or filters. Try adjusting the filters.</p>
+                  <button type="button" class="empty-clear-btn" (click)="clearFilters()">
+                    Reset filters
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div
+          class="pagination-bar"
+          *ngIf="!loading() && filteredTickets().length > 0"
+          aria-label="Ticket pagination"
+        >
+          <div class="pagination-summary">
+            Showing
+            <strong>
+              {{ ((currentPage() - 1) * pageSize) + 1 }}
+              -
+              {{ pageEnd() }}
+            </strong>
+            of
+            <strong>{{ filteredTickets().length }}</strong>
+          </div>
+
+          <div class="pagination-controls">
+            <button
+              type="button"
+              class="pagination-btn"
+              (click)="previousPage()"
+              [disabled]="currentPage() === 1"
+              aria-label="Previous page"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m14 6-6 6 6 6"></path>
+              </svg>
+            </button>
+
+            <button
+              *ngFor="let page of pageNumbers()"
+              type="button"
+              class="pagination-number"
+              [class.active]="currentPage() === page"
+              (click)="goToPage(page)"
+              [attr.aria-current]="currentPage() === page ? 'page' : null"
+            >
+              {{ page }}
+            </button>
+
+            <button
+              type="button"
+              class="pagination-btn"
+              (click)="nextPage()"
+              [disabled]="currentPage() === totalPages()"
+              aria-label="Next page"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m10 6 6 6-6 6"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <aside class="side-column">
+
+        <section class="side-card">
+          <div class="side-card-header">
+            <div>
+              <div class="section-label">Overview</div>
+              <h3>Status distribution</h3>
+            </div>
+            <span class="side-total">{{ totalTickets() }}</span>
+          </div>
+
+          <div class="status-list">
+            <div class="status-row">
+              <div>
+                <span class="status-dot dot-open"></span>
+                <span>Open</span>
+              </div>
+              <strong>{{ openTickets() }}</strong>
+            </div>
+            <div class="progress-track">
+              <span
+                class="progress-fill"
+                [style.width.%]="totalTickets() ? (openTickets() / totalTickets()) * 100 : 0"
+              ></span>
+            </div>
+
+            <div class="status-row">
+              <div>
+                <span class="status-dot dot-progress"></span>
+                <span>In Progress</span>
+              </div>
+              <strong>{{ inProgressTickets() }}</strong>
+            </div>
+            <div class="progress-track">
+              <span
+                class="progress-fill"
+                [style.width.%]="totalTickets() ? (inProgressTickets() / totalTickets()) * 100 : 0"
+              ></span>
+            </div>
+
+            <div class="status-row">
+              <div>
+                <span class="status-dot dot-resolved"></span>
+                <span>Resolved</span>
+              </div>
+              <strong>{{ resolvedTickets() }}</strong>
+            </div>
+            <div class="progress-track">
+              <span
+                class="progress-fill"
+                [style.width.%]="totalTickets() ? (resolvedTickets() / totalTickets()) * 100 : 0"
+              ></span>
+            </div>
+
+            <div class="status-row">
+              <div>
+                <span class="status-dot dot-closed"></span>
+                <span>Closed</span>
+              </div>
+              <strong>{{ closedTickets() }}</strong>
+            </div>
+            <div class="progress-track">
+              <span
+                class="progress-fill"
+                [style.width.%]="totalTickets() ? (closedTickets() / totalTickets()) * 100 : 0"
+              ></span>
+            </div>
+
+            <div class="status-row">
+              <div>
+                <span class="status-dot dot-reopened"></span>
+                <span>Reopened</span>
+              </div>
+              <strong>{{ reopenedTickets() }}</strong>
+            </div>
+            <div class="progress-track">
+              <span
+                class="progress-fill"
+                [style.width.%]="totalTickets() ? (reopenedTickets() / totalTickets()) * 100 : 0"
+              ></span>
+            </div>
+          </div>
+        </section>
+
+        <section class="side-card">
+          <div class="section-label">Management</div>
+          <h3>Ticket workflow</h3>
+          <p class="side-copy">
+            Open a ticket to review its details, assignment, and workflow status.
+          </p>
+
+          <div class="workflow-note">
+            <span class="workflow-marker"></span>
+            <div>
+              <strong>Current data</strong>
+              <span>{{ tickets().length }} tickets loaded</span>
+            </div>
+          </div>
+
+          <div class="workflow-note">
+            <span class="workflow-marker"></span>
+            <div>
+              <strong>Active agents</strong>
+              <span>{{ agents.length }} available for assignment</span>
+            </div>
+          </div>
+        </section>
+
+      </aside>
+    </section>
+  </main>
+</div>
+
+<!-- View details -->
+<div
+  class="modal-overlay"
+  *ngIf="showDetailsModal()"
+  (click)="closeDetails()"
+>
+  <section
+    class="ticket-modal details-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="ticket-details-title"
+    (click)="$event.stopPropagation()"
+    *ngIf="selectedTicket() as ticket"
+  >
+    <header class="modal-header">
+      <div>
+        <span class="modal-ticket-id">Ticket #{{ ticket.id }}</span>
+        <h2 id="ticket-details-title">{{ ticket.title }}</h2>
+      </div>
+      <button
+        type="button"
+        class="modal-close-btn"
+        aria-label="Close ticket details"
+        (click)="closeDetails()"
+      >×</button>
+    </header>
+
+    <div class="modal-body">
+      <div class="detail-summary">
+        <div>
+          <span class="detail-label">Status</span>
+          <span class="status-badge" [ngClass]="getStatusClass(ticket.statusName)">
+            {{ ticket.statusName }}
+          </span>
+        </div>
+        <div>
+          <span class="detail-label">Priority</span>
+          <span class="priority-badge" [ngClass]="getPriorityClass(ticket.priorityName)">
+            {{ ticket.priorityName }}
+          </span>
+        </div>
+        <div>
+          <span class="detail-label">Category</span>
+          <strong>{{ ticket.categoryName }}</strong>
+        </div>
+      </div>
+
+      <section class="detail-section">
+        <h3>Description</h3>
+        <div class="description-box">{{ ticket.description }}</div>
+      </section>
+
+      <section class="detail-section">
+        <h3>Ticket information</h3>
+        <div class="details-grid">
+          <div class="detail-item">
+            <span class="detail-label">Employee</span>
+            <strong>{{ ticket.userName }}</strong>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Assigned to</span>
+            <strong>{{ ticket.assignedToName || 'Unassigned' }}</strong>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Created</span>
+            <strong>{{ formatDate(ticket.createdAt) }}</strong>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Last updated</span>
+            <strong>{{ formatDate(ticket.updatedAt) }}</strong>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Resolved</span>
+            <strong>{{ formatDate(ticket.resolvedAt) }}</strong>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Closed</span>
+            <strong>{{ formatDate(ticket.closedAt) }}</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="quick-management">
+        <div class="section-label">Management</div>
+        <h3>Quick management</h3>
+
+        <div class="management-row">
+          <div>
+            <span class="management-label">Assign IT agent</span>
+            <span class="management-description">Assign or reassign this ticket.</span>
+          </div>
+          <select
+            [ngModel]="ticket.assignedToId"
+            (ngModelChange)="changeAssignment($event)"
+            aria-label="Assign IT agent"
+          >
+            <option [ngValue]="null">Unassigned</option>
+            <option *ngFor="let agent of agents" [ngValue]="agent.id">
+              {{ agent.fullName }}
+            </option>
+          </select>
+        </div>
+
+        <div class="management-row">
+          <div>
+            <span class="management-label">Change status</span>
+            <span class="management-description">Follow the ticket workflow.</span>
+          </div>
+          <select
+            [ngModel]="ticket.statusId"
+            (ngModelChange)="changeStatus(+$event)"
+            aria-label="Change ticket status"
+          >
+            <option
+              *ngFor="let status of getAllowedStatuses(ticket.statusId)"
+              [ngValue]="status.id"
+            >
+              {{ status.name }}
+            </option>
+          </select>
+        </div>
+      </section>
+
+      <section class="lifecycle-section">
+        <div class="section-label">History</div>
+        <h3>Ticket lifecycle</h3>
+        <div class="lifecycle-list">
+          <div class="lifecycle-item">
+            <span class="lifecycle-marker"></span>
+            <div>
+              <strong>Created</strong>
+              <span>{{ formatDate(ticket.createdAt) }}</span>
+            </div>
+          </div>
+          <div class="lifecycle-item" *ngIf="ticket.updatedAt">
+            <span class="lifecycle-marker"></span>
+            <div>
+              <strong>Last updated</strong>
+              <span>{{ formatDate(ticket.updatedAt) }}</span>
+            </div>
+          </div>
+          <div class="lifecycle-item" *ngIf="ticket.resolvedAt">
+            <span class="lifecycle-marker"></span>
+            <div>
+              <strong>Resolved</strong>
+              <span>{{ formatDate(ticket.resolvedAt) }}</span>
+            </div>
+          </div>
+          <div class="lifecycle-item" *ngIf="ticket.closedAt">
+            <span class="lifecycle-marker"></span>
+            <div>
+              <strong>Closed</strong>
+              <span>{{ formatDate(ticket.closedAt) }}</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <footer class="modal-footer">
+      <button type="button" class="secondary-btn" (click)="closeDetails()">
+        Close
+      </button>
+      <button type="button" class="primary-btn" (click)="openEditTicket(ticket)">
+        Edit ticket
+      </button>
+      <button type="button" class="danger-btn" (click)="openDeleteModal(ticket)">
+        Delete
+      </button>
+    </footer>
+  </section>
+</div>
+
+<!-- Edit ticket -->
+<div
+  class="modal-overlay"
+  *ngIf="showEditModal()"
+  (click)="closeEditModal()"
+>
+  <section
+    class="ticket-modal edit-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="edit-ticket-title"
+    (click)="$event.stopPropagation()"
+  >
+    <header class="modal-header">
+      <div>
+        <span class="modal-ticket-id">Ticket #{{ editTicket.id }}</span>
+        <h2 id="edit-ticket-title">Edit ticket</h2>
+      </div>
+      <button
+        type="button"
+        class="modal-close-btn"
+        aria-label="Close edit ticket"
+        (click)="closeEditModal()"
+      >×</button>
+    </header>
+
+    <div class="modal-body edit-body">
+      <div class="form-group">
+        <label for="edit-title">Ticket title</label>
+        <input id="edit-title" type="text" [(ngModel)]="editTicket.title" placeholder="Enter ticket title" />
+      </div>
+
+      <div class="form-group">
+        <label for="edit-description">Description</label>
+        <textarea id="edit-description" rows="5" [(ngModel)]="editTicket.description" placeholder="Enter ticket description"></textarea>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="edit-employee">Employee</label>
+          <select id="edit-employee" [(ngModel)]="editTicket.userId">
+            <option [ngValue]="0">Select Employee</option>
+            <option *ngFor="let user of users()" [ngValue]="user.id">
+              {{ user.fullName }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="edit-agent">Assigned IT Agent</label>
+          <select id="edit-agent" [(ngModel)]="editTicket.assignedToId">
+            <option [ngValue]="null">Unassigned</option>
+            <option *ngFor="let agent of agents" [ngValue]="agent.id">
+              {{ agent.fullName }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="edit-category">Category</label>
+          <select id="edit-category" [(ngModel)]="editTicket.categoryId">
+            <option [ngValue]="0">Select Category</option>
+            <option *ngFor="let category of categories()" [ngValue]="category.id">
+              {{ category.name }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="edit-priority">Priority</label>
+          <select id="edit-priority" [(ngModel)]="editTicket.priorityId">
+            <option [ngValue]="0">Select Priority</option>
+            <option *ngFor="let priority of priorities()" [ngValue]="priority.id">
+              {{ priority.name }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="edit-status">Status</label>
+          <select id="edit-status" [(ngModel)]="editTicket.statusId">
+            <option
+              *ngFor="let status of getAllowedStatuses(editTicket.statusId)"
+              [ngValue]="status.id"
+            >
+              {{ status.name }}
+            </option>
+          </select>
+          <span class="form-hint">Only valid workflow transitions are available.</span>
+        </div>
+      </div>
+    </div>
+
+    <footer class="modal-footer">
+      <button
+        type="button"
+        class="secondary-btn"
+        (click)="closeEditModal()"
+        [disabled]="saving()"
+      >
+        Cancel
+      </button>
+      <button
+        type="button"
+        class="primary-btn"
+        (click)="saveTicket()"
+        [disabled]="saving()"
+      >
+        <span *ngIf="saving()" class="button-spinner" aria-hidden="true"></span>
+        {{ saving() ? 'Saving...' : 'Save changes' }}
+      </button>
+    </footer>
+  </section>
+</div>
+
+<!-- Delete confirmation -->
+<div
+  class="modal-overlay"
+  *ngIf="showDeleteModal()"
+  (click)="closeDeleteModal()"
+>
+  <section
+    class="ticket-modal delete-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="delete-ticket-title"
+    (click)="$event.stopPropagation()"
+    *ngIf="ticketToDelete() as ticket"
+  >
+    <div class="delete-mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24">
+        <path d="M5 7h14"></path>
+        <path d="M9 7V4h6v3"></path>
+        <path d="m8 7 .7 13h6.6L16 7"></path>
+        <path d="M10 10v7M14 10v7"></path>
+      </svg>
+    </div>
+
+    <div class="section-label">Confirmation</div>
+    <h2 id="delete-ticket-title">Delete ticket?</h2>
+    <p>
+      Are you sure you want to delete <strong>Ticket #{{ ticket.id }}</strong>?
+      <span class="delete-ticket-title">“{{ ticket.title }}”</span>
+    </p>
+
+    <div class="warning-box">This action cannot be undone.</div>
+
+    <footer class="modal-footer delete-footer">
+      <button
+        type="button"
+        class="secondary-btn"
+        (click)="closeDeleteModal()"
+        [disabled]="deleting()"
+      >
+        Cancel
+      </button>
+      <button
+        type="button"
+        class="danger-btn"
+        (click)="confirmDelete()"
+        [disabled]="deleting()"
+      >
+        <span *ngIf="deleting()" class="button-spinner" aria-hidden="true"></span>
+        {{ deleting() ? 'Deleting...' : 'Delete ticket' }}
+      </button>
+    </footer>
+  </section>
+</div>
+
+<div
+  class="message-toast"
+  *ngIf="message()"
+  [ngClass]="{
+    'message-success': messageType() === 'success',
+    'message-error': messageType() === 'error'
+  }"
+  role="status"
+>
+  <span class="message-status" aria-hidden="true">
+    {{ messageType() === 'success' ? '✓' : '!' }}
+  </span>
+  <span>{{ message() }}</span>
+</div>

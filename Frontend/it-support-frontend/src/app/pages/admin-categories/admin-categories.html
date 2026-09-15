@@ -1,0 +1,742 @@
+<div class="admin-categories-page">
+
+  <header class="page-header">
+
+    <div class="admin-topbar">
+
+      <div class="topbar-status">
+        <span class="system-status-dot" aria-hidden="true"></span>
+        <div>
+          <strong>System operational</strong>
+          <span>All services running</span>
+        </div>
+      </div>
+
+      <div class="topbar-divider" aria-hidden="true"></div>
+
+      <div class="topbar-updated">
+        <span class="updated-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="8.5"></circle>
+            <path d="M12 7v5l3 2"></path>
+          </svg>
+        </span>
+        <div>
+          <span>Last updated</span>
+          <strong>{{ formatLastUpdated(lastUpdated()) }}</strong>
+        </div>
+      </div>
+
+      <div class="profile-menu">
+        <button
+          type="button"
+          class="profile-trigger"
+          aria-haspopup="menu"
+          [attr.aria-expanded]="isProfileMenuOpen"
+          [attr.aria-label]="'Open profile menu for ' + adminUser().fullName"
+          (click)="toggleProfileMenu()"
+        >
+          <span class="profile-avatar">
+            <img
+              *ngIf="getProfileImageUrl()"
+              [src]="getProfileImageUrl()!"
+              [alt]="adminUser().fullName"
+              (error)="handleProfileImageError()"
+            />
+            <span *ngIf="!getProfileImageUrl()" aria-hidden="true">
+              {{ adminUser().fullName.charAt(0).toUpperCase() }}
+            </span>
+          </span>
+
+          <span class="profile-trigger-copy">
+            <strong>{{ adminUser().fullName }}</strong>
+            <small>{{ adminUser().role }}</small>
+          </span>
+
+          <svg class="profile-chevron" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m7 10 5 5 5-5"></path>
+          </svg>
+        </button>
+
+        <div *ngIf="isProfileMenuOpen" class="profile-dropdown" role="menu">
+          <div class="profile-dropdown-header">
+            <strong>{{ adminUser().fullName }}</strong>
+            <span>{{ adminUser().role }}</span>
+          </div>
+          <div class="profile-dropdown-divider"></div>
+
+          <button
+            type="button"
+            class="profile-menu-item"
+            role="menuitem"
+            (click)="goToAdminProfile()"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="8" r="4"></circle>
+              <path d="M4 21a8 8 0 0 1 16 0"></path>
+            </svg>
+            <span>View profile</span>
+          </button>
+
+          <button
+            type="button"
+            class="profile-menu-item profile-menu-item-danger"
+            role="menuitem"
+            (click)="logout()"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M10 17l5-5-5-5"></path>
+              <path d="M15 12H3"></path>
+              <path d="M21 4v16"></path>
+            </svg>
+            <span>Logout</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="breadcrumb" aria-label="Breadcrumb">
+      <button type="button" class="breadcrumb-link" (click)="goBack()">
+        Home
+      </button>
+      <span class="breadcrumb-separator" aria-hidden="true">/</span>
+      <span class="breadcrumb-current">Categories</span>
+    </div>
+
+    <div class="page-heading">
+      <div class="page-heading-copy">
+        <span class="page-kicker">ADMINISTRATION</span>
+        <h1>Categories Management</h1>
+        <p>Manage ticket categories used by the support system.</p>
+      </div>
+
+      <div class="page-heading-actions">
+        <button
+          type="button"
+          class="secondary-toolbar-btn"
+          (click)="refreshCategories()"
+          [disabled]="loading()"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M20 11a8 8 0 1 0 2 5" />
+            <path d="M20 4v7h-7" />
+          </svg>
+          <span>Refresh</span>
+        </button>
+
+        <button
+          type="button"
+          class="primary-action-btn"
+          (click)="openAddModal()"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 5v14" />
+            <path d="M5 12h14" />
+          </svg>
+          <span>Add Category</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+
+  <section class="category-stats" aria-label="Category statistics">
+
+    <article class="stat-card stat-card-primary">
+      <div class="stat-icon">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 5h16v14H4z" />
+          <path d="M8 9h8M8 13h5" />
+        </svg>
+      </div>
+      <div class="stat-content">
+        <span class="stat-label">Total Categories</span>
+        <strong class="stat-value">{{ categories().length }}</strong>
+        <span class="stat-description">All ticket categories</span>
+      </div>
+    </article>
+
+    <article class="stat-card stat-card-success">
+      <div class="stat-icon">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="9" />
+          <path d="m8 12 2.5 2.5L16 9" />
+        </svg>
+      </div>
+      <div class="stat-content">
+        <span class="stat-label">With Description</span>
+        <strong class="stat-value">{{ categoriesWithDescription() }}</strong>
+        <span class="stat-description">Categories documented</span>
+      </div>
+    </article>
+
+    <article class="stat-card stat-card-teal">
+      <div class="stat-icon">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M5 5h14v14H5z" />
+          <path d="M8 8h8M8 12h8M8 16h4" />
+        </svg>
+      </div>
+      <div class="stat-content">
+        <span class="stat-label">No Description</span>
+        <strong class="stat-value">{{ categoriesWithoutDescription() }}</strong>
+        <span class="stat-description">Need more details</span>
+      </div>
+    </article>
+
+  </section>
+
+
+  <section class="categories-main-card">
+
+    <div class="categories-card-header">
+      <div class="card-heading">
+        <span class="section-kicker">DIRECTORY</span>
+        <h2>System Categories</h2>
+        <p>
+          Showing
+          {{ filteredCategories().length }}
+          of
+          {{ categories().length }}
+          categories
+        </p>
+      </div>
+    </div>
+
+
+    <div class="categories-toolbar">
+
+      <label class="search-field">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="11" cy="11" r="7" />
+          <path d="m20 20-4-4" />
+        </svg>
+
+        <input
+          type="text"
+          [ngModel]="searchTerm()"
+          (ngModelChange)="onSearchChange($event)"
+          placeholder="Search categories or descriptions..."
+          aria-label="Search categories"
+        />
+
+        <button
+          *ngIf="searchTerm()"
+          type="button"
+          class="clear-search"
+          (click)="clearSearch()"
+          aria-label="Clear search"
+        >
+          ×
+        </button>
+      </label>
+
+      <button
+        type="button"
+        class="filter-reset-btn"
+        (click)="clearSearch()"
+        [disabled]="!searchTerm()"
+      >
+        Reset
+      </button>
+
+    </div>
+
+
+    <div *ngIf="loading()" class="loading-state">
+      <div class="loading-spinner" aria-hidden="true"></div>
+      <p>Loading categories...</p>
+    </div>
+
+
+    <div *ngIf="!loading()" class="table-wrapper">
+
+      <table class="categories-table">
+
+        <thead>
+          <tr>
+            <th class="id-column">#</th>
+            <th>Category</th>
+            <th>Description</th>
+            <th class="actions-column">Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          <tr *ngFor="let category of pagedCategories()">
+
+            <td class="id-cell">
+              #{{ category.id }}
+            </td>
+
+            <td>
+              <div class="category-info">
+                <div class="category-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M3 7.5A1.5 1.5 0 0 1 4.5 6H9l2 2h8.5A1.5 1.5 0 0 1 21 9.5v8A1.5 1.5 0 0 1 19.5 19h-15A1.5 1.5 0 0 1 3 17.5z" />
+                    <path d="M3.5 9h17" />
+                  </svg>
+                </div>
+                <strong>{{ category.name }}</strong>
+              </div>
+            </td>
+
+            <td>
+              <div class="description-cell" [title]="category.description || 'No description'">
+                <span *ngIf="category.description">
+                  {{ category.description }}
+                </span>
+                <span *ngIf="!category.description" class="no-description">
+                  No description
+                </span>
+              </div>
+            </td>
+
+            <td>
+              <div class="action-buttons">
+                <button
+                  type="button"
+                  class="view-btn"
+                  (click)="viewCategory(category)"
+                  title="View category"
+                >
+                  View
+                </button>
+
+                <button
+                  type="button"
+                  class="edit-btn"
+                  (click)="openEditModal(category)"
+                  title="Edit category"
+                >
+                  Edit
+                </button>
+
+                <button
+                  type="button"
+                  class="delete-btn"
+                  (click)="openDeleteModal(category)"
+                  title="Delete category"
+                >
+                  Delete
+                </button>
+              </div>
+            </td>
+
+          </tr>
+
+
+          <tr *ngIf="filteredCategories().length === 0">
+            <td colspan="4" class="empty-categories">
+              <div class="empty-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                  <path d="M4 5h16v14H4z" />
+                  <path d="M8 9h8M8 13h5" />
+                </svg>
+              </div>
+
+              <h3>No Categories Found</h3>
+
+              <p *ngIf="!searchTerm()">
+                There are no ticket categories to display.
+              </p>
+
+              <p *ngIf="searchTerm()">
+                No categories match your search.
+              </p>
+
+              <button
+                *ngIf="searchTerm()"
+                type="button"
+                class="clear-results-btn"
+                (click)="clearSearch()"
+              >
+                Clear Search
+              </button>
+            </td>
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+
+    <div
+      *ngIf="!loading() && filteredCategories().length > 0"
+      class="pagination-bar"
+    >
+      <span class="pagination-summary">
+        Showing
+        {{ pageStart() + 1 }}
+        -
+        {{ pageEnd() }}
+        of
+        {{ filteredCategories().length }}
+      </span>
+
+      <div class="pagination-controls" aria-label="Category pagination">
+
+        <button
+          type="button"
+          class="pagination-btn"
+          (click)="previousPage()"
+          [disabled]="currentPage() === 1"
+          aria-label="Previous page"
+        >
+          ‹
+        </button>
+
+        <button
+          *ngFor="let page of pageNumbers()"
+          type="button"
+          class="pagination-btn"
+          [class.active]="page === currentPage()"
+          (click)="goToPage(page)"
+        >
+          {{ page }}
+        </button>
+
+        <button
+          type="button"
+          class="pagination-btn"
+          (click)="nextPage()"
+          [disabled]="currentPage() === totalPages()"
+          aria-label="Next page"
+        >
+          ›
+        </button>
+
+      </div>
+    </div>
+
+  </section>
+
+
+  <!-- View Category Modal -->
+  <div
+    *ngIf="showDetailsModal()"
+    class="modal-overlay"
+    (click)="closeDetails()"
+  >
+    <div
+      class="category-modal details-modal"
+      (click)="$event.stopPropagation()"
+    >
+
+      <div class="modal-header">
+        <div>
+          <span class="modal-eyebrow">CATEGORY</span>
+          <h2>Category Details</h2>
+          <p>View category information.</p>
+        </div>
+
+        <button
+          type="button"
+          class="modal-close-btn"
+          (click)="closeDetails()"
+          aria-label="Close details"
+        >
+          ×
+        </button>
+      </div>
+
+      <div
+        *ngIf="selectedCategory() as category"
+        class="modal-body"
+      >
+        <div class="details-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path d="M3 7.5A1.5 1.5 0 0 1 4.5 6H9l2 2h8.5A1.5 1.5 0 0 1 21 9.5v8A1.5 1.5 0 0 1 19.5 19h-15A1.5 1.5 0 0 1 3 17.5z" />
+            <path d="M3.5 9h17" />
+          </svg>
+        </div>
+
+        <div class="detail-row">
+          <span class="detail-label">Category ID</span>
+          <strong>#{{ category.id }}</strong>
+        </div>
+
+        <div class="detail-row">
+          <span class="detail-label">Category Name</span>
+          <strong>{{ category.name }}</strong>
+        </div>
+
+        <div class="detail-row description-detail">
+          <span class="detail-label">Description</span>
+          <p>{{ category.description || 'No description available.' }}</p>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="secondary-btn"
+          (click)="closeDetails()"
+        >
+          Close
+        </button>
+
+        <button
+          *ngIf="selectedCategory() as category"
+          type="button"
+          class="primary-btn"
+          (click)="openEditModal(category)"
+        >
+          Edit Category
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- Add Category Modal -->
+  <div
+    *ngIf="showAddModal()"
+    class="modal-overlay"
+    (click)="closeAddModal()"
+  >
+    <div
+      class="category-modal"
+      (click)="$event.stopPropagation()"
+    >
+
+      <div class="modal-header">
+        <div>
+          <span class="modal-eyebrow">CATEGORY MANAGEMENT</span>
+          <h2>Add Category</h2>
+          <p>Create a new ticket category.</p>
+        </div>
+
+        <button
+          type="button"
+          class="modal-close-btn"
+          (click)="closeAddModal()"
+          [disabled]="saving()"
+          aria-label="Close add category"
+        >
+          ×
+        </button>
+      </div>
+
+      <div class="modal-body">
+
+        <div class="form-group">
+          <label for="new-category-name">
+            Category Name <span>*</span>
+          </label>
+
+          <input
+            id="new-category-name"
+            type="text"
+            [(ngModel)]="newCategory.name"
+            placeholder="Enter category name"
+            maxlength="100"
+          />
+
+          <small>Minimum 2 characters.</small>
+        </div>
+
+        <div class="form-group">
+          <label for="new-category-description">Description</label>
+
+          <textarea
+            id="new-category-description"
+            [(ngModel)]="newCategory.description"
+            placeholder="Enter category description"
+            rows="4"
+            maxlength="500"
+          ></textarea>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="secondary-btn"
+          (click)="closeAddModal()"
+          [disabled]="saving()"
+        >
+          Cancel
+        </button>
+
+        <button
+          type="button"
+          class="primary-btn"
+          (click)="createCategory()"
+          [disabled]="saving()"
+        >
+          <span *ngIf="!saving()">Add Category</span>
+          <span *ngIf="saving()">Creating...</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- Edit Category Modal -->
+  <div
+    *ngIf="showEditModal()"
+    class="modal-overlay"
+    (click)="closeEditModal()"
+  >
+    <div
+      class="category-modal"
+      (click)="$event.stopPropagation()"
+    >
+
+      <div class="modal-header">
+        <div>
+          <span class="modal-eyebrow">CATEGORY MANAGEMENT</span>
+          <h2>Edit Category</h2>
+          <p>Update ticket category information.</p>
+        </div>
+
+        <button
+          type="button"
+          class="modal-close-btn"
+          (click)="closeEditModal()"
+          [disabled]="saving()"
+          aria-label="Close edit category"
+        >
+          ×
+        </button>
+      </div>
+
+      <div class="modal-body">
+
+        <div class="form-group">
+          <label for="edit-category-name">
+            Category Name <span>*</span>
+          </label>
+
+          <input
+            id="edit-category-name"
+            type="text"
+            [(ngModel)]="editCategory.name"
+            placeholder="Enter category name"
+            maxlength="100"
+          />
+
+          <small>Minimum 2 characters.</small>
+        </div>
+
+        <div class="form-group">
+          <label for="edit-category-description">Description</label>
+
+          <textarea
+            id="edit-category-description"
+            [(ngModel)]="editCategory.description"
+            placeholder="Enter category description"
+            rows="4"
+            maxlength="500"
+          ></textarea>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="secondary-btn"
+          (click)="closeEditModal()"
+          [disabled]="saving()"
+        >
+          Cancel
+        </button>
+
+        <button
+          type="button"
+          class="primary-btn"
+          (click)="updateCategory()"
+          [disabled]="saving()"
+        >
+          <span *ngIf="!saving()">Save Changes</span>
+          <span *ngIf="saving()">Saving...</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- Delete Confirmation Modal -->
+  <div
+    *ngIf="showDeleteModal()"
+    class="modal-overlay"
+    (click)="closeDeleteModal()"
+  >
+    <div
+      class="category-modal delete-modal"
+      (click)="$event.stopPropagation()"
+    >
+
+      <div class="delete-warning-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 4 21 19H3z" />
+          <path d="M12 9v4M12 16v1" />
+        </svg>
+      </div>
+
+      <div class="delete-content">
+        <span class="modal-eyebrow">DANGER ZONE</span>
+        <h2>Delete Category?</h2>
+        <p>
+          Are you sure you want to delete
+          <strong>{{ categoryToDelete()?.name }}</strong>?
+        </p>
+        <span>This action cannot be undone.</span>
+      </div>
+
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="secondary-btn"
+          (click)="closeDeleteModal()"
+          [disabled]="deleting()"
+        >
+          Cancel
+        </button>
+
+        <button
+          type="button"
+          class="danger-btn"
+          (click)="confirmDelete()"
+          [disabled]="deleting()"
+        >
+          <span *ngIf="!deleting()">Delete Category</span>
+          <span *ngIf="deleting()">Deleting...</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+
+  <div *ngIf="message()" class="message-overlay" aria-live="polite">
+    <div
+      class="message-box"
+      [class.success-message]="messageType() === 'success'"
+      [class.error-message]="messageType() === 'error'"
+    >
+      <div class="message-icon" aria-hidden="true">
+        <span *ngIf="messageType() === 'success'">✓</span>
+        <span *ngIf="messageType() === 'error'">!</span>
+      </div>
+
+      <div class="message-text">
+        <strong>
+          {{ messageType() === 'success' ? 'Success' : 'Error' }}
+        </strong>
+        <span>{{ message() }}</span>
+      </div>
+    </div>
+  </div>
+
+</div>

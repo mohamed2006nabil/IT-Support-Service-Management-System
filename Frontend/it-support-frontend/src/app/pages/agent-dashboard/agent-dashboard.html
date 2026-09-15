@@ -1,0 +1,302 @@
+<main class="agent-content">
+
+      <section class="page-header">
+        <div>
+          <nav class="breadcrumbs" aria-label="Breadcrumb">
+            <span>Home</span>
+            <span aria-hidden="true">/</span>
+            <strong>Dashboard</strong>
+          </nav>
+
+          <span class="eyebrow">WORKSPACE</span>
+          <h1>Agent Dashboard</h1>
+          <p>Monitor your assigned tickets, current workload, and recent support activity.</p>
+        </div>
+
+        <button type="button" class="refresh-button" (click)="refreshDashboard()" [disabled]="loading()">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M20 11a8 8 0 1 0 2 5"></path>
+            <path d="M20 5v6h-6"></path>
+          </svg>
+          <span>{{ loading() ? 'Refreshing...' : 'Refresh' }}</span>
+        </button>
+      </section>
+
+      <section class="welcome-panel">
+        <div class="welcome-copy">
+          <span class="section-label">WELCOME BACK</span>
+          <h2>{{ greeting() }}, {{ firstName() }}</h2>
+          <p>Here is a quick view of the work currently assigned to you.</p>
+        </div>
+
+        <div class="welcome-status">
+          <span class="status-dot" aria-hidden="true"></span>
+          <span>Ready for work</span>
+        </div>
+      </section>
+
+      <section class="section-block">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">OVERVIEW</span>
+            <h2>My Workload</h2>
+          </div>
+          <span class="section-count">{{ tickets().length }} assigned tickets</span>
+        </div>
+
+        <div class="metric-grid">
+          <article class="metric-card">
+            <div class="metric-icon blue">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="4" y="5" width="16" height="14" rx="2"></rect>
+                <path d="M8 9h8M8 13h5"></path>
+              </svg>
+            </div>
+            <div>
+              <span>Total Assigned</span>
+              <strong>{{ totalAssigned() }}</strong>
+              <small>Tickets assigned to you</small>
+            </div>
+          </article>
+
+          <article class="metric-card">
+            <div class="metric-icon orange">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="12" r="8"></circle>
+                <path d="M12 8v4l3 2"></path>
+              </svg>
+            </div>
+            <div>
+              <span>Open</span>
+              <strong>{{ openCount() }}</strong>
+              <small>Waiting for active work</small>
+            </div>
+          </article>
+
+          <article class="metric-card">
+            <div class="metric-icon indigo">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M5 12h14"></path>
+                <path d="m13 6 6 6-6 6"></path>
+              </svg>
+            </div>
+            <div>
+              <span>In Progress</span>
+              <strong>{{ inProgressCount() }}</strong>
+              <small>Currently being handled</small>
+            </div>
+          </article>
+
+          <article class="metric-card">
+            <div class="metric-icon green">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m6 12 4 4 8-9"></path>
+              </svg>
+            </div>
+            <div>
+              <span>Resolved</span>
+              <strong>{{ resolvedCount() }}</strong>
+              <small>Resolved tickets</small>
+            </div>
+          </article>
+
+          <article class="metric-card">
+            <div class="metric-icon slate">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M7 12h10"></path>
+                <path d="M12 7v10"></path>
+                <circle cx="12" cy="12" r="8"></circle>
+              </svg>
+            </div>
+            <div>
+              <span>Closed</span>
+              <strong>{{ closedCount() }}</strong>
+              <small>Completed tickets</small>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="dashboard-grid">
+
+        <article class="panel tickets-panel">
+          <div class="panel-header">
+            <div>
+              <span class="eyebrow">CURRENT WORK</span>
+              <h2>Recent Assigned Tickets</h2>
+              <p>{{ recentTickets().length }} of {{ tickets().length }} assigned tickets shown</p>
+            </div>
+
+            <button type="button" class="text-button" (click)="goToAgentTickets()">
+              View all
+              <span aria-hidden="true">→</span>
+            </button>
+          </div>
+
+          <div *ngIf="loading()" class="panel-state">
+            <span class="loader" aria-hidden="true"></span>
+            <span>Loading assigned tickets...</span>
+          </div>
+
+          <div *ngIf="!loading() && errorMessage()" class="panel-state error-state">
+            <strong>Unable to load your tickets.</strong>
+            <button type="button" class="text-button" (click)="refreshDashboard()">Try again</button>
+          </div>
+
+          <div *ngIf="!loading() && !errorMessage() && tickets().length === 0" class="panel-state empty-state">
+            <div class="empty-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="4" y="5" width="16" height="14" rx="2"></rect>
+                <path d="M8 10h8M8 14h5"></path>
+              </svg>
+            </div>
+            <strong>No tickets assigned</strong>
+            <span>New assignments will appear here.</span>
+          </div>
+
+          <div *ngIf="!loading() && !errorMessage() && tickets().length > 0" class="ticket-list">
+            <button
+              type="button"
+              class="ticket-row"
+              *ngFor="let ticket of recentTickets()"
+              (click)="viewTicket(ticket.id)"
+            >
+              <span class="ticket-id">#{{ ticket.id }}</span>
+
+              <span class="ticket-main">
+                <strong>{{ ticket.title }}</strong>
+                <small>{{ ticket.userName || 'User' }} · {{ ticket.categoryName || 'Uncategorized' }}</small>
+              </span>
+
+              <span class="ticket-priority" [ngClass]="priorityClass(ticket.priorityName)">
+                {{ ticket.priorityName || '—' }}
+              </span>
+
+              <span class="ticket-status" [ngClass]="statusClass(ticket.statusName)">
+                {{ ticket.statusName || '—' }}
+              </span>
+
+              <span class="ticket-arrow" aria-hidden="true">→</span>
+            </button>
+          </div>
+        </article>
+
+        <aside class="panel workload-panel">
+          <div class="panel-header">
+            <div>
+              <span class="eyebrow">STATUS</span>
+              <h2>Workload Summary</h2>
+              <p>Current ticket distribution</p>
+            </div>
+          </div>
+
+          <div class="status-summary">
+            <div class="summary-row">
+              <div class="summary-label">
+                <span class="summary-dot open"></span>
+                <span>Open</span>
+              </div>
+              <strong>{{ openCount() }}</strong>
+            </div>
+            <div class="summary-track">
+              <span [style.width.%]="statusPercent(openCount())"></span>
+            </div>
+
+            <div class="summary-row">
+              <div class="summary-label">
+                <span class="summary-dot progress"></span>
+                <span>In Progress</span>
+              </div>
+              <strong>{{ inProgressCount() }}</strong>
+            </div>
+            <div class="summary-track">
+              <span [style.width.%]="statusPercent(inProgressCount())"></span>
+            </div>
+
+            <div class="summary-row">
+              <div class="summary-label">
+                <span class="summary-dot resolved"></span>
+                <span>Resolved</span>
+              </div>
+              <strong>{{ resolvedCount() }}</strong>
+            </div>
+            <div class="summary-track">
+              <span [style.width.%]="statusPercent(resolvedCount())"></span>
+            </div>
+
+            <div class="summary-row">
+              <div class="summary-label">
+                <span class="summary-dot closed"></span>
+                <span>Closed</span>
+              </div>
+              <strong>{{ closedCount() }}</strong>
+            </div>
+            <div class="summary-track">
+              <span [style.width.%]="statusPercent(closedCount())"></span>
+            </div>
+          </div>
+
+          <div class="workload-footer">
+            <span>Need to review all assigned work?</span>
+            <button type="button" class="secondary-button" (click)="goToAgentTickets()">
+              Open Tickets
+            </button>
+          </div>
+        </aside>
+
+      </section>
+
+      <section class="section-block">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">QUICK ACTIONS</span>
+            <h2>Agent Tools</h2>
+          </div>
+        </div>
+
+        <div class="action-grid">
+          <button type="button" class="action-card" (click)="goToAgentTickets()">
+            <span class="action-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="4" y="5" width="16" height="14" rx="2"></rect>
+                <path d="M8 9h8M8 13h5"></path>
+              </svg>
+            </span>
+            <span class="action-copy">
+              <strong>Assigned Tickets</strong>
+              <small>Open and manage your current workload.</small>
+            </span>
+            <span class="action-arrow" aria-hidden="true">→</span>
+          </button>
+
+          <button type="button" class="action-card" (click)="goToAgentNotifications()">
+            <span class="action-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path>
+                <path d="M10 21h4"></path>
+              </svg>
+            </span>
+            <span class="action-copy">
+              <strong>Notifications</strong>
+              <small>Review assignment and support updates.</small>
+            </span>
+            <span class="action-arrow" aria-hidden="true">→</span>
+          </button>
+
+          <button type="button" class="action-card" (click)="goToAgentTicketHistory()">
+            <span class="action-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="5" y="4" width="14" height="16" rx="2"></rect>
+                <path d="M8 8h8M8 12h8M8 16h5"></path>
+              </svg>
+            </span>
+            <span class="action-copy">
+              <strong>Ticket History</strong>
+              <small>Review previous ticket activity.</small>
+            </span>
+            <span class="action-arrow" aria-hidden="true">→</span>
+          </button>
+        </div>
+      </section>
+
+    </main>

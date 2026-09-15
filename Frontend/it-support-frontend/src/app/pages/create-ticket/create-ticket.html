@@ -1,0 +1,239 @@
+<!-- =========================
+     Success / Error Toast
+     ========================= -->
+
+<div
+  *ngIf="showToast"
+  class="toast-notification"
+  [class.success-toast]="toastType === 'success'"
+  [class.error-toast]="toastType === 'error'"
+>
+
+  <div class="toast-icon">
+
+    <span *ngIf="toastType === 'success'">
+      ✓
+    </span>
+
+    <span *ngIf="toastType === 'error'">
+      !
+    </span>
+
+  </div>
+
+
+  <div class="toast-content">
+
+    <strong *ngIf="toastType === 'success'">
+      Ticket Created Successfully
+    </strong>
+
+    <strong *ngIf="toastType === 'error'">
+      Something Went Wrong
+    </strong>
+
+
+    <span *ngIf="toastType === 'success'">
+      Your support ticket has been submitted successfully.
+    </span>
+
+    <span *ngIf="toastType === 'error'">
+      Failed to create ticket. Please try again.
+    </span>
+
+  </div>
+
+
+  <button
+    type="button"
+    class="toast-close"
+    (click)="closeToast()"
+  >
+    ×
+  </button>
+
+
+  <div
+    class="toast-progress"
+    [class.error-progress]="toastType === 'error'"
+  ></div>
+
+</div>
+
+
+
+<!-- =========================
+     Create Ticket Page
+     ========================= -->
+
+<div class="create-ticket-page">
+
+  <div class="create-ticket-header">
+
+    <h1>
+      Create New Ticket
+    </h1>
+
+    <p>
+      Submit a new IT support request.
+    </p>
+
+  </div>
+
+
+  <div class="create-ticket-card">
+
+    <button
+     type="button"
+     class="back-btn"
+     (click)="goBack()"
+    >
+    ← Back
+    </button>
+
+    <form (ngSubmit)="createTicket()">
+
+
+      <!-- Title -->
+
+      <div class="form-group">
+
+        <label>
+          Title
+        </label>
+
+        <input
+          type="text"
+          name="title"
+          [(ngModel)]="title"
+          placeholder="Enter ticket title"
+          required
+          minlength="3"
+          [disabled]="isCreating"
+        >
+
+      </div>
+
+
+      <!-- Description -->
+
+      <div class="form-group">
+
+        <label>
+          Description
+        </label>
+
+        <textarea
+          name="description"
+          [(ngModel)]="description"
+          placeholder="Describe your issue"
+          rows="6"
+          required
+          minlength="5"
+          [disabled]="isCreating"
+        ></textarea>
+
+      </div>
+
+
+      <!-- Category + Priority -->
+
+      <div class="form-row">
+
+
+        <div class="form-group">
+
+          <label>
+            Category
+          </label>
+
+          <select
+            name="categoryId"
+            [(ngModel)]="categoryId"
+            [disabled]="isCreating"
+          >
+
+            <option [ngValue]="1">
+              Hardware
+            </option>
+
+            <option [ngValue]="2">
+              Software
+            </option>
+
+            <option [ngValue]="3">
+              Network
+            </option>
+
+          </select>
+
+        </div>
+
+
+
+        <div class="form-group">
+
+          <label>
+            Priority
+          </label>
+
+          <select
+            name="priorityId"
+            [(ngModel)]="priorityId"
+            [disabled]="isCreating"
+          >
+
+            <option [ngValue]="1">
+              Low
+            </option>
+
+            <option [ngValue]="2">
+              Medium
+            </option>
+
+            <option [ngValue]="3">
+              High
+            </option>
+
+          </select>
+
+        </div>
+
+      </div>
+
+
+      <!-- Button -->
+
+      <div class="form-actions">
+
+        <button
+          type="submit"
+          class="submit-btn"
+          [class.loading]="isCreating"
+          [disabled]="isCreating"
+        >
+
+          <span
+            class="spinner"
+            *ngIf="isCreating"
+          ></span>
+
+
+          <span *ngIf="!isCreating">
+            Create Ticket
+          </span>
+
+
+          <span *ngIf="isCreating">
+            Creating...
+          </span>
+
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</div>
