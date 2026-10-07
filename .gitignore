@@ -109,3 +109,5 @@ Thumbs.db
 
 /.sass-cache/
 /connect.lock
+# Uploaded profile images
+Backend/ITSupportAPI/wwwroot/profile-images/*

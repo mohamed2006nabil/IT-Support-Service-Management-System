@@ -37,6 +37,10 @@ public class AttachmentsController : ControllerBase
         _context = context;
     }
 
+    // =========================================================
+    // GET ALL ATTACHMENTS
+    // =========================================================
+
     [Authorize(Roles = "Employee,IT Agent,Admin")]
     [HttpGet]
     public async Task<ActionResult<IEnumerable<AttachmentResponseDto>>> GetAttachments()
@@ -98,6 +102,10 @@ public class AttachmentsController : ControllerBase
 
         return Ok(attachments);
     }
+
+    // =========================================================
+    // GET ATTACHMENT BY ID
+    // =========================================================
 
     [Authorize(Roles = "Employee,IT Agent,Admin")]
     [HttpGet("{id}")]
@@ -164,11 +172,15 @@ public class AttachmentsController : ControllerBase
         return Ok(attachment);
     }
 
+    // =========================================================
+    // UPLOAD ATTACHMENT
+    // =========================================================
+
     [Authorize(Roles = "Employee,IT Agent,Admin")]
     [HttpPost("upload")]
     [RequestSizeLimit(MaxFileSize)]
     public async Task<ActionResult<AttachmentResponseDto>> UploadAttachment(
-        [FromForm] IFormFile file,
+        IFormFile file,
         [FromForm] int ticketId,
         [FromForm] int uploadedById)
     {
@@ -311,6 +323,10 @@ public class AttachmentsController : ControllerBase
         }
     }
 
+    // =========================================================
+    // DOWNLOAD ATTACHMENT
+    // =========================================================
+
     [Authorize(Roles = "Employee,IT Agent,Admin")]
     [HttpGet("download/{id}")]
     public async Task<IActionResult> DownloadAttachment(int id)
@@ -367,6 +383,10 @@ public class AttachmentsController : ControllerBase
             attachment.FileName,
             enableRangeProcessing: true);
     }
+
+    // =========================================================
+    // DELETE ATTACHMENT
+    // =========================================================
 
     [Authorize(Roles = "Employee,IT Agent,Admin")]
     [HttpDelete("{id}")]
