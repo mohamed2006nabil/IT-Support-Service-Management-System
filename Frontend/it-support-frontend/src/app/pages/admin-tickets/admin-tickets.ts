@@ -26,6 +26,7 @@ import {
 } from '@angular/router';
 
 import { UsersService } from '../../services/users';
+import { environment } from '../../../environments/environment';
 
 
 // =========================================================
@@ -137,19 +138,19 @@ export class AdminTickets implements OnInit {
   // =======================================================
 
   private ticketsApi =
-    'http://localhost:5058/api/tickets';
+    `${environment.apiBaseUrl}/api/tickets`;
 
   private usersApi =
-    'http://localhost:5058/api/users';
+    `${environment.apiBaseUrl}/api/users`;
 
   private categoriesApi =
-    'http://localhost:5058/api/categories';
+    `${environment.apiBaseUrl}/api/categories`;
 
   private prioritiesApi =
-    'http://localhost:5058/api/priorities';
+    `${environment.apiBaseUrl}/api/priorities`;
 
   private statusesApi =
-    'http://localhost:5058/api/statuses';
+    `${environment.apiBaseUrl}/api/statuses`;
 
 
   // =======================================================

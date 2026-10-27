@@ -12,6 +12,10 @@ import {
   Observable
 } from 'rxjs';
 
+import {
+  environment
+} from '../../environments/environment';
+
 
 /**
  * Represents the authenticated user stored by the application.
@@ -71,7 +75,7 @@ export class AuthService {
   // =========================================================
 
   private readonly apiBaseUrl =
-    'http://localhost:5058';
+    environment.apiBaseUrl;
 
   private readonly authApiUrl =
     `${this.apiBaseUrl}/api/auth`;
@@ -177,7 +181,18 @@ export class AuthService {
       return null;
     }
 
-    return `${this.apiBaseUrl}${imagePath}`;
+    if (
+      imagePath.startsWith('https://') ||
+      imagePath.startsWith('http://')
+    ) {
+      return imagePath;
+    }
+
+    const normalizedPath = imagePath.startsWith('/')
+      ? imagePath
+      : `/${imagePath}`;
+
+    return `${this.apiBaseUrl}${normalizedPath}`;
   }
 
 

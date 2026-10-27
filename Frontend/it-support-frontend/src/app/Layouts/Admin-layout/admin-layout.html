@@ -217,7 +217,7 @@
 
           <img
             class="user-avatar user-avatar-image"
-            [src]="'http://localhost:5058' + user()!.profileImagePath"
+            [src]="apiBaseUrl + user()!.profileImagePath"
             [alt]="(user()?.fullName || 'Administrator') + ' profile photo'"
           />
 

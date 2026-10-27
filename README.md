@@ -229,7 +229,7 @@ The development API is currently configured around:
 http://localhost:5058
 ```
 
-The actual port should be confirmed from the local launch configuration.
+The actual port should be confirmed from the local launch configuration. When the API starts in Development mode, it opens the Swagger UI using the active HTTP address.
 
 ### 3. JWT Development Secret
 
@@ -244,7 +244,17 @@ dotnet user-secrets set "Jwt:Key" "YOUR_DEVELOPMENT_SECRET_AT_LEAST_32_CHARACTER
 
 Also configure the required JWT issuer/audience values used by the application.
 
-### 4. Frontend
+### 4. Create the Initial Admin Account
+
+Run this from `Backend/ITSupportAPI` after the database setup script has created the tables and seeded the `Admin` role:
+
+```bash
+dotnet run -- --bootstrap-admin
+```
+
+The command uses the configured database connection, asks for the Admin's name and email, and prompts for a password without displaying it. It hashes the password with ASP.NET Core's `PasswordHasher<User>`, looks up the existing `Admin` role, and creates an active account only if the database contains no users. The check is repeated inside a serializable transaction to prevent concurrent bootstrap runs from creating multiple first accounts. It exits with an error if any user already exists or the `Admin` role is missing. This is a local command-line operation; it does not add a public account-creation endpoint.
+
+### 5. Frontend
 
 Open a second terminal in:
 
@@ -269,6 +279,8 @@ Then open:
 ```text
 http://localhost:4200
 ```
+
+The development build uses `src/environments/environment.development.ts`. Production builds use `src/environments/environment.ts`, whose empty `apiBaseUrl` makes API requests relative to the frontend origin by default. If the deployed API uses a separate origin, set its actual URL there before creating the production build.
 
 ---
 

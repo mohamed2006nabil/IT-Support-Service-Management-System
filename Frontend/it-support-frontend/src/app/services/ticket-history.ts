@@ -6,6 +6,7 @@ import {
 } from '@angular/common/http';
 
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 
 export interface TicketHistoryItem {
@@ -41,7 +42,7 @@ export interface TicketHistoryItem {
 export class TicketHistory {
 
   private apiUrl =
-    'http://localhost:5058/api/tickethistory';
+    `${environment.apiBaseUrl}/api/tickethistory`;
 
 
   constructor(

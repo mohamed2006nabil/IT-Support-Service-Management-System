@@ -18,6 +18,7 @@ import {
 } from '@angular/common/http';
 
 import { Router } from '@angular/router';
+import { environment } from '../../../environments/environment';
 
 interface AgentUser {
   userId?: number;
@@ -58,7 +59,7 @@ export class AgentDashboard implements OnInit {
   private readonly platformId = inject(PLATFORM_ID);
 
   private readonly apiUrl =
-    'http://localhost:5058/api/tickets';
+    `${environment.apiBaseUrl}/api/tickets`;
 
   user: AgentUser | null = null;
 

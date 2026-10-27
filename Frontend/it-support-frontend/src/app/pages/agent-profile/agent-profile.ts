@@ -27,6 +27,7 @@ import {
 import {
   UsersService
 } from '../../services/users';
+import { environment } from '../../../environments/environment';
 
 
 export interface AgentProfile {
@@ -65,7 +66,7 @@ export class AgentProfile implements OnInit {
   private readonly usersService =
     inject(UsersService);
 
-  private readonly apiUrl = 'http://localhost:5058/api/auth';
+  private readonly apiUrl = `${environment.apiBaseUrl}/api/auth`;
 
   
 

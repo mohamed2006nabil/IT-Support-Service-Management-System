@@ -26,6 +26,7 @@ import {
 } from '@angular/router';
 
 import { UsersService } from '../../services/users';
+import { environment } from '../../../environments/environment';
 
 export interface AdminPriority {
   id: number;
@@ -54,7 +55,7 @@ export class AdminPriorities implements OnInit {
   private readonly usersService = inject(UsersService);
 
   private apiUrl =
-    'http://localhost:5058/api/priorities';
+    `${environment.apiBaseUrl}/api/priorities`;
 
   priorities = signal<AdminPriority[]>([]);
 

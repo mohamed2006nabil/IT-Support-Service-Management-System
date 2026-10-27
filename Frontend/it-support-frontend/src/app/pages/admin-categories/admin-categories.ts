@@ -28,6 +28,7 @@ import {
 import {
   UsersService
 } from '../../services/users';
+import { environment } from '../../../environments/environment';
 
 
 // =====================================================
@@ -88,7 +89,7 @@ export class AdminCategories implements OnInit {
   // ===================================================
 
   private apiUrl =
-    'http://localhost:5058/api/categories';
+    `${environment.apiBaseUrl}/api/categories`;
 
 
   // ===================================================

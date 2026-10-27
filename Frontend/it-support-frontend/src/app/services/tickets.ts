@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface Ticket {
   id: number;
@@ -23,7 +24,7 @@ export interface Ticket {
 export class TicketsService {
 
   private apiUrl =
-    'http://localhost:5058/api/tickets';
+    `${environment.apiBaseUrl}/api/tickets`;
 
   constructor(private http: HttpClient) {}
 
@@ -65,7 +66,7 @@ export class TicketsService {
     });
 
     return this.http.get<any[]>(
-      'http://localhost:5058/api/priorities',
+      `${environment.apiBaseUrl}/api/priorities`,
       { headers }
     );
   }
@@ -79,7 +80,7 @@ export class TicketsService {
     });
 
     return this.http.get<any[]>(
-      'http://localhost:5058/api/statuses',
+      `${environment.apiBaseUrl}/api/statuses`,
       { headers }
     );
   }

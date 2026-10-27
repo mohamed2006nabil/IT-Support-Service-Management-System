@@ -16,6 +16,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { UsersService } from '../../services/users';
+import { environment } from '../../../environments/environment';
 
 export interface AdminTicketHistoryItem {
   id: number;
@@ -41,7 +42,7 @@ export class AdminTicketHistory implements OnInit {
   private platformId = inject(PLATFORM_ID);
   readonly usersService = inject(UsersService);
 
-  private apiUrl = 'http://localhost:5058/api/tickethistory';
+  private apiUrl = `${environment.apiBaseUrl}/api/tickethistory`;
 
   history = signal<AdminTicketHistoryItem[]>([]);
   loading = signal(false);

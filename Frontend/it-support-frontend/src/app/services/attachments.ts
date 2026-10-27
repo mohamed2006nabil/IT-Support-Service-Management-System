@@ -7,6 +7,8 @@ import {
 
 import { Observable } from 'rxjs';
 
+import { environment } from '../../environments/environment';
+
 
 export interface Attachment {
 
@@ -33,7 +35,7 @@ export interface Attachment {
 export class AttachmentsService {
 
   private apiUrl =
-    'http://localhost:5058/api/attachments';
+    `${environment.apiBaseUrl}/api/attachments`;
 
 
   constructor(

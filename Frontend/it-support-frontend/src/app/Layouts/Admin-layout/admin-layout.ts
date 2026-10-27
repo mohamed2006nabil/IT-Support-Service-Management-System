@@ -17,6 +17,10 @@ import {
   AuthService
 } from '../../services/auth';
 
+import {
+  environment
+} from '../../../environments/environment';
+
 
 @Component({
   selector: 'app-admin-layout',
@@ -37,6 +41,8 @@ export class AdminLayout {
   private readonly authService =
     inject(AuthService);
 
+  readonly apiBaseUrl =
+    environment.apiBaseUrl;
 
   /*
    * Reactive reference to the authenticated user.

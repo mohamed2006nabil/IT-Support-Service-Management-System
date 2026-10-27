@@ -5,6 +5,7 @@ import {
 } from '@angular/common/http';
 
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface Comment {
   id: number;
@@ -21,7 +22,7 @@ export interface Comment {
 export class CommentsService {
 
   private apiUrl =
-    'http://localhost:5058/api/comments';
+    `${environment.apiBaseUrl}/api/comments`;
 
   constructor(
     private http: HttpClient

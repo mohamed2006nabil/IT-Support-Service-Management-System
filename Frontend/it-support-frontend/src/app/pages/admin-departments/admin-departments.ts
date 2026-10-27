@@ -26,6 +26,7 @@ import {
 } from '@angular/router';
 
 import { UsersService } from '../../services/users';
+import { environment } from '../../../environments/environment';
 
 export interface AdminDepartment {
   id: number;
@@ -53,7 +54,7 @@ export class AdminDepartments implements OnInit {
   private readonly usersService = inject(UsersService);
 
   private apiUrl =
-    'http://localhost:5058/api/departments';
+    `${environment.apiBaseUrl}/api/departments`;
 
   departments = signal<AdminDepartment[]>([]);
 
